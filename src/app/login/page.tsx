@@ -12,8 +12,22 @@ export default async function LoginPage() {
   }
 
   return (
-    <div className="bg-app min-h-screen">
-      <div className="bg-app-overlay min-h-screen flex flex-col">
+    <div
+      className="min-h-screen"
+      style={{
+        backgroundImage: "url('/background.jpg')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+        backgroundRepeat: 'no-repeat',
+      }}
+    >
+      <div
+        className="min-h-screen flex flex-col"
+        style={{
+          background: 'linear-gradient(180deg, rgba(15, 15, 19, 0.85) 0%, rgba(15, 15, 19, 0.95) 100%)',
+        }}
+      >
         {/* Back to Home */}
         <header className="px-6 py-4">
           <Link
