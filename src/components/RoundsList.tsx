@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { TournamentRound } from '@/types';
 import { MatchupCard } from './MatchupCard';
 import { useTournament } from '@/context/TournamentContext';
-import { calculateTournamentStats } from '@/lib/utils';
-import { Trophy, AlertTriangle } from 'lucide-react';
+import { calculateFullTournamentStats } from '@/lib/utils';
+import { Trophy, AlertTriangle, Swords } from 'lucide-react';
 
 interface RoundsListProps {
   rounds: TournamentRound[];
@@ -16,7 +16,9 @@ export function RoundsList({ rounds, playerLeaderId }: RoundsListProps) {
   const { deleteRound } = useTournament();
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
-  const stats = calculateTournamentStats(rounds);
+  const stats = calculateFullTournamentStats(rounds);
+  const swissRounds = rounds.filter((r) => r.roundType === 'swiss');
+  const topcutRounds = rounds.filter((r) => r.roundType === 'topcut');
 
   const handleDeleteClick = (roundId: string) => {
     if (deleteConfirmId === roundId) {
@@ -24,7 +26,6 @@ export function RoundsList({ rounds, playerLeaderId }: RoundsListProps) {
       setDeleteConfirmId(null);
     } else {
       setDeleteConfirmId(roundId);
-      // Auto-cancel after 3 seconds
       setTimeout(() => setDeleteConfirmId(null), 3000);
     }
   };
@@ -42,39 +43,86 @@ export function RoundsList({ rounds, playerLeaderId }: RoundsListProps) {
   }
 
   return (
-    <div className="space-y-4">
-      {/* Running Record */}
+    <div className="space-y-6">
+      {/* Overall Stats */}
       <div className="flex items-center justify-between p-4 bg-background-tertiary rounded-lg border border-border">
         <div>
-          <p className="text-sm text-foreground-muted">Current Record</p>
-          <p className="text-2xl font-bold gradient-text">{stats.record}</p>
+          <p className="text-sm text-foreground-muted">Overall Record</p>
+          <p className="text-2xl font-bold text-foreground">{stats.overall.record}</p>
         </div>
         <div className="text-right">
           <p className="text-sm text-foreground-muted">Win Rate</p>
-          <p className="text-2xl font-bold text-foreground">{stats.winRate}%</p>
+          <p className="text-2xl font-bold text-foreground">{stats.overall.winRate}%</p>
         </div>
       </div>
 
-      {/* Rounds List */}
-      <div className="space-y-3">
-        {rounds.map((round) => (
-          <div key={round.id}>
-            {deleteConfirmId === round.id && (
-              <div className="flex items-center gap-2 p-2 mb-2 bg-accent-danger/10 border border-accent-danger/30 rounded-lg">
-                <AlertTriangle className="w-4 h-4 text-accent-danger" />
-                <span className="text-sm text-accent-danger">
-                  Click delete again to confirm removal
-                </span>
-              </div>
-            )}
-            <MatchupCard
-              round={round}
-              playerLeaderId={playerLeaderId}
-              onDelete={() => handleDeleteClick(round.id)}
-            />
+      {/* Swiss Rounds Section */}
+      {swissRounds.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Swords className="w-5 h-5 text-foreground-muted" />
+              <h3 className="text-lg font-semibold text-foreground">Swiss Rounds</h3>
+            </div>
+            <span className="text-sm text-foreground-muted">
+              {stats.swiss.record} ({stats.swiss.winRate}%)
+            </span>
           </div>
-        ))}
-      </div>
+          <div className="space-y-3">
+            {swissRounds.map((round) => (
+              <div key={round.id}>
+                {deleteConfirmId === round.id && (
+                  <div className="flex items-center gap-2 p-2 mb-2 bg-accent-danger/10 border border-accent-danger/30 rounded-lg">
+                    <AlertTriangle className="w-4 h-4 text-accent-danger" />
+                    <span className="text-sm text-accent-danger">
+                      Click delete again to confirm removal
+                    </span>
+                  </div>
+                )}
+                <MatchupCard
+                  round={round}
+                  playerLeaderId={playerLeaderId}
+                  onDelete={() => handleDeleteClick(round.id)}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Top Cut Section */}
+      {topcutRounds.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Trophy className="w-5 h-5 text-accent-warning" />
+              <h3 className="text-lg font-semibold text-accent-warning">Top Cut</h3>
+            </div>
+            <span className="text-sm text-foreground-muted">
+              {stats.topcut.record} ({stats.topcut.winRate}%)
+            </span>
+          </div>
+          <div className="space-y-3">
+            {topcutRounds.map((round) => (
+              <div key={round.id}>
+                {deleteConfirmId === round.id && (
+                  <div className="flex items-center gap-2 p-2 mb-2 bg-accent-danger/10 border border-accent-danger/30 rounded-lg">
+                    <AlertTriangle className="w-4 h-4 text-accent-danger" />
+                    <span className="text-sm text-accent-danger">
+                      Click delete again to confirm removal
+                    </span>
+                  </div>
+                )}
+                <MatchupCard
+                  round={round}
+                  playerLeaderId={playerLeaderId}
+                  onDelete={() => handleDeleteClick(round.id)}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

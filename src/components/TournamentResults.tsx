@@ -2,9 +2,9 @@
 
 import { useRef, useState } from 'react';
 import { useTournament } from '@/context/TournamentContext';
-import { TOURNAMENT_FORMATS } from '@/types';
+import { TOURNAMENT_FORMATS, TOPCUT_LEVEL_OPTIONS } from '@/types';
 import { getLeaderById } from '@/data/leaders';
-import { calculateTournamentStats, generateLeaderGradient, generateMatchupGradient, isWin } from '@/lib/utils';
+import { calculateFullTournamentStats, generateLeaderGradient, generateMatchupGradient, isWin } from '@/lib/utils';
 import { LeaderCard } from './LeaderCard';
 import { ArrowLeft, Download, Copy, Check, Twitter, Trophy, Swords } from 'lucide-react';
 
@@ -23,7 +23,9 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
 
   const playerLeader = getLeaderById(tournament.playerLeaderId);
   const formatLabel = TOURNAMENT_FORMATS[tournament.format];
-  const stats = calculateTournamentStats(tournament.rounds);
+  const stats = calculateFullTournamentStats(tournament.rounds);
+  const swissRounds = tournament.rounds.filter((r) => r.roundType === 'swiss');
+  const topcutRounds = tournament.rounds.filter((r) => r.roundType === 'topcut');
 
   const handleExport = async () => {
     if (!exportRef.current) return;
@@ -38,7 +40,6 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
         logging: false,
       });
 
-      // Download the image
       const link = document.createElement('a');
       link.download = `riftrecord-${tournament.title.replace(/\s+/g, '-').toLowerCase()}.png`;
       link.href = canvas.toDataURL('image/png');
@@ -72,7 +73,6 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
           } catch {
-            // Fallback: trigger download if clipboard fails
             handleExport();
           }
         }
@@ -85,17 +85,13 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
   };
 
   const tweetText = encodeURIComponent(
-    `${tournament.title}\n\nPlaying ${playerLeader?.name}: ${stats.record} (${stats.winRate}% WR)\n\n#Riftbound #RiftRecord`
+    `${tournament.title}\n\nPlaying ${playerLeader?.name}: ${stats.overall.record} (${stats.overall.winRate}% WR)${topcutRounds.length > 0 ? `\nTop Cut: ${stats.topcut.record}` : ''}\n\n#Riftbound #RiftRecord`
   );
 
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Back Button */}
-      <button
-        type="button"
-        onClick={onBack}
-        className="btn btn-ghost"
-      >
+      <button type="button" onClick={onBack} className="btn btn-ghost">
         <ArrowLeft className="w-5 h-5" />
         Back to Tracker
       </button>
@@ -112,7 +108,7 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
         }}
       >
         <div
-          className="w-full h-full p-6 flex flex-col"
+          className="w-full h-full p-5 flex flex-col relative"
           style={{
             background: playerLeader
               ? generateLeaderGradient(tournament.playerLeaderId, 135)
@@ -123,94 +119,141 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
           <div
             className="absolute inset-0"
             style={{
-              background: 'linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.7) 100%)',
+              background: 'linear-gradient(180deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.75) 100%)',
             }}
           />
 
           {/* Content */}
           <div className="relative z-10 flex flex-col h-full">
             {/* Header */}
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex-1">
-                <h2 className="text-lg md:text-xl font-bold text-white mb-1 line-clamp-1">
-                  {tournament.title}
-                </h2>
-                <p className="text-xs md:text-sm text-white/70">{formatLabel}</p>
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex items-center gap-3">
+                {playerLeader && (
+                  <LeaderCard leader={playerLeader} size="sm" showName={false} />
+                )}
+                <div>
+                  <h2 className="text-base md:text-lg font-bold text-white line-clamp-1">
+                    {tournament.title}
+                  </h2>
+                  <p className="text-xs text-white/60">{formatLabel}</p>
+                  {playerLeader && (
+                    <p className="text-sm font-medium text-white/80">{playerLeader.name}</p>
+                  )}
+                </div>
               </div>
               <div className="text-right">
-                <div className="flex items-center gap-1 text-white/70">
-                  <Trophy className="w-4 h-4" />
-                  <span className="text-xs">Record</span>
+                <div className="flex items-center gap-1 text-white/60 justify-end">
+                  <Trophy className="w-3.5 h-3.5" />
+                  <span className="text-[10px]">Record</span>
                 </div>
-                <p className="text-2xl md:text-3xl font-bold text-white">{stats.record}</p>
+                <p className="text-xl md:text-2xl font-bold text-white">{stats.overall.record}</p>
               </div>
             </div>
 
-            {/* Player Leader */}
-            <div className="flex items-center gap-3 mb-4 p-3 bg-black/30 rounded-lg">
-              {playerLeader && (
-                <>
-                  <LeaderCard leader={playerLeader} size="sm" showName={false} />
-                  <div>
-                    <p className="text-xs text-white/60">Playing as</p>
-                    <p className="text-base font-semibold text-white">
-                      {playerLeader.name}
-                    </p>
+            {/* Rounds Container */}
+            <div className="flex-1 overflow-hidden flex flex-col gap-2">
+              {/* Swiss Rounds */}
+              {swissRounds.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <Swords className="w-3 h-3 text-white/60" />
+                    <span className="text-[10px] font-medium text-white/60">
+                      Swiss: {stats.swiss.record}
+                    </span>
                   </div>
-                </>
-              )}
-            </div>
-
-            {/* Matchups Grid */}
-            <div className="flex-1 overflow-hidden">
-              <div className="grid grid-cols-2 gap-2">
-                {tournament.rounds.slice(0, 8).map((round) => {
-                  const opponent = getLeaderById(round.opponentLeaderId);
-                  const won = isWin(round.result);
-                  return (
-                    <div
-                      key={round.id}
-                      className="relative rounded-lg overflow-hidden p-2"
-                      style={{
-                        background: generateMatchupGradient(
-                          tournament.playerLeaderId,
-                          round.opponentLeaderId
-                        ),
-                      }}
-                    >
-                      <div className="absolute inset-0 bg-black/50" />
-                      <div className="relative z-10 flex items-center justify-between">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-[10px] text-white/60">R{round.roundNumber}</span>
-                          <Swords className="w-3 h-3 text-white/60" />
-                          <span className="text-xs font-medium text-white truncate max-w-[80px]">
-                            {opponent?.name}
-                          </span>
-                        </div>
-                        <span
-                          className={`text-xs font-bold px-1.5 py-0.5 rounded ${
-                            won
-                              ? 'bg-green-500/30 text-green-400'
-                              : 'bg-red-500/30 text-red-400'
-                          }`}
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {swissRounds.slice(0, 8).map((round) => {
+                      const opponent = getLeaderById(round.opponentLeaderId);
+                      const won = isWin(round.result);
+                      return (
+                        <div
+                          key={round.id}
+                          className="relative rounded overflow-hidden p-1.5"
+                          style={{
+                            background: generateMatchupGradient(
+                              tournament.playerLeaderId,
+                              round.opponentLeaderId
+                            ),
+                          }}
                         >
-                          {round.result}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              {tournament.rounds.length > 8 && (
-                <p className="text-xs text-white/50 text-center mt-2">
-                  +{tournament.rounds.length - 8} more rounds
-                </p>
+                          <div className="absolute inset-0 bg-black/50" />
+                          <div className="relative z-10 flex items-center justify-between gap-1">
+                            <span className="text-[9px] text-white/80 truncate flex-1">
+                              {opponent?.name}
+                            </span>
+                            <span
+                              className={`text-[9px] font-bold px-1 py-0.5 rounded ${
+                                won ? 'bg-green-500/40 text-green-300' : 'bg-red-500/40 text-red-300'
+                              }`}
+                            >
+                              {round.result}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Top Cut Rounds */}
+              {topcutRounds.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <Trophy className="w-3 h-3 text-amber-400" />
+                    <span className="text-[10px] font-medium text-amber-400">
+                      Top Cut: {stats.topcut.record}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {topcutRounds.map((round) => {
+                      const opponent = getLeaderById(round.opponentLeaderId);
+                      const won = isWin(round.result);
+                      const topcutInfo = round.topcutLevel
+                        ? TOPCUT_LEVEL_OPTIONS.find((t) => t.value === round.topcutLevel)
+                        : null;
+                      return (
+                        <div
+                          key={round.id}
+                          className="relative rounded overflow-hidden p-1.5 border border-amber-500/30"
+                          style={{
+                            background: generateMatchupGradient(
+                              tournament.playerLeaderId,
+                              round.opponentLeaderId
+                            ),
+                          }}
+                        >
+                          <div className="absolute inset-0 bg-black/50" />
+                          <div className="relative z-10">
+                            <div className="flex items-center gap-1 mb-0.5">
+                              <span className="text-[8px] font-bold text-amber-400">
+                                {topcutInfo?.shortLabel}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between gap-1">
+                              <span className="text-[9px] text-white/80 truncate flex-1">
+                                {opponent?.name}
+                              </span>
+                              <span
+                                className={`text-[9px] font-bold px-1 py-0.5 rounded ${
+                                  won ? 'bg-green-500/40 text-green-300' : 'bg-red-500/40 text-red-300'
+                                }`}
+                              >
+                                {round.result}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               )}
             </div>
 
             {/* Footer */}
-            <div className="mt-auto pt-3 border-t border-white/10">
-              <p className="text-xs text-white/50 text-center">
+            <div className="mt-auto pt-2 border-t border-white/10">
+              <p className="text-[9px] text-white/40 text-center">
                 Generated with RiftRecord
               </p>
             </div>
@@ -263,48 +306,89 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
       {/* Full Results List */}
       <div className="card max-w-[600px] mx-auto">
         <h3 className="text-lg font-semibold text-foreground mb-4">Full Results</h3>
-        <div className="space-y-2">
-          {tournament.rounds.map((round) => {
-            const opponent = getLeaderById(round.opponentLeaderId);
-            const won = isWin(round.result);
-            return (
-              <div
-                key={round.id}
-                className="flex items-center justify-between p-3 bg-background-tertiary rounded-lg"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-sm text-foreground-muted w-8">
-                    R{round.roundNumber}
-                  </span>
-                  <span className="text-sm font-medium text-foreground">
-                    vs {opponent?.name}
-                  </span>
-                </div>
-                <span
-                  className={`text-sm font-bold ${
-                    won ? 'text-accent-success' : 'text-accent-danger'
-                  }`}
-                >
-                  {won ? 'W' : 'L'} {round.result}
-                </span>
-              </div>
-            );
-          })}
-        </div>
+
+        {/* Swiss Results */}
+        {swissRounds.length > 0 && (
+          <div className="mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <Swords className="w-4 h-4 text-foreground-muted" />
+              <span className="text-sm font-medium text-foreground-secondary">
+                Swiss Rounds ({stats.swiss.record})
+              </span>
+            </div>
+            <div className="space-y-2">
+              {swissRounds.map((round) => {
+                const opponent = getLeaderById(round.opponentLeaderId);
+                const won = isWin(round.result);
+                return (
+                  <div
+                    key={round.id}
+                    className="flex items-center justify-between p-3 bg-background-tertiary rounded-lg"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm text-foreground-muted w-8">R{round.roundNumber}</span>
+                      <span className="text-sm font-medium text-foreground">vs {opponent?.name}</span>
+                    </div>
+                    <span className={`text-sm font-bold ${won ? 'text-accent-success' : 'text-accent-danger'}`}>
+                      {won ? 'W' : 'L'} {round.result}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Topcut Results */}
+        {topcutRounds.length > 0 && (
+          <div className="mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <Trophy className="w-4 h-4 text-accent-warning" />
+              <span className="text-sm font-medium text-accent-warning">
+                Top Cut ({stats.topcut.record})
+              </span>
+            </div>
+            <div className="space-y-2">
+              {topcutRounds.map((round) => {
+                const opponent = getLeaderById(round.opponentLeaderId);
+                const won = isWin(round.result);
+                const topcutInfo = round.topcutLevel
+                  ? TOPCUT_LEVEL_OPTIONS.find((t) => t.value === round.topcutLevel)
+                  : null;
+                return (
+                  <div
+                    key={round.id}
+                    className="flex items-center justify-between p-3 bg-background-tertiary rounded-lg border border-accent-warning/20"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-medium text-accent-warning w-12">
+                        {topcutInfo?.shortLabel}
+                      </span>
+                      <span className="text-sm font-medium text-foreground">vs {opponent?.name}</span>
+                    </div>
+                    <span className={`text-sm font-bold ${won ? 'text-accent-success' : 'text-accent-danger'}`}>
+                      {won ? 'W' : 'L'} {round.result}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Stats Summary */}
-        <div className="mt-6 pt-4 border-t border-border">
+        <div className="pt-4 border-t border-border">
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <p className="text-2xl font-bold text-accent-success">{stats.wins}</p>
+              <p className="text-2xl font-bold text-accent-success">{stats.overall.wins}</p>
               <p className="text-sm text-foreground-muted">Wins</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-accent-danger">{stats.losses}</p>
+              <p className="text-2xl font-bold text-accent-danger">{stats.overall.losses}</p>
               <p className="text-sm text-foreground-muted">Losses</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">{stats.winRate}%</p>
+              <p className="text-2xl font-bold text-foreground">{stats.overall.winRate}%</p>
               <p className="text-sm text-foreground-muted">Win Rate</p>
             </div>
           </div>

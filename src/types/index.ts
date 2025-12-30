@@ -41,12 +41,44 @@ export const MATCH_RESULTS: MatchResultInfo[] = [
   { value: '0-2', label: 'L 0-2', isWin: false },
 ];
 
+// Topcut placement levels
+export type TopcutLevel = 'top64' | 'top32' | 'top16' | 'top8' | 'top4' | 'top2';
+
+export const TOPCUT_LEVELS: Record<TopcutLevel, string> = {
+  'top64': 'Top 64',
+  'top32': 'Top 32',
+  'top16': 'Top 16',
+  'top8': 'Top 8',
+  'top4': 'Top 4 (Semifinals)',
+  'top2': 'Top 2 (Finals)',
+};
+
+export interface TopcutLevelInfo {
+  value: TopcutLevel;
+  label: string;
+  shortLabel: string;
+}
+
+export const TOPCUT_LEVEL_OPTIONS: TopcutLevelInfo[] = [
+  { value: 'top64', label: 'Top 64', shortLabel: 'T64' },
+  { value: 'top32', label: 'Top 32', shortLabel: 'T32' },
+  { value: 'top16', label: 'Top 16', shortLabel: 'T16' },
+  { value: 'top8', label: 'Top 8', shortLabel: 'T8' },
+  { value: 'top4', label: 'Top 4 (Semifinals)', shortLabel: 'T4' },
+  { value: 'top2', label: 'Top 2 (Finals)', shortLabel: 'Finals' },
+];
+
+// Round type: swiss (normal rounds) or topcut (elimination)
+export type RoundType = 'swiss' | 'topcut';
+
 // A single round in a tournament
 export interface TournamentRound {
   id: string;
   roundNumber: number;
+  roundType: RoundType;
   opponentLeaderId: string;
   result: MatchResult;
+  topcutLevel?: TopcutLevel; // Only set when roundType is 'topcut'
   notes?: string;
 }
 
@@ -67,4 +99,12 @@ export interface TournamentStats {
   losses: number;
   record: string;
   winRate: number;
+}
+
+// Separate stats for swiss and topcut
+export interface TournamentFullStats {
+  swiss: TournamentStats;
+  topcut: TournamentStats;
+  overall: TournamentStats;
+  finalPlacement?: TopcutLevel;
 }

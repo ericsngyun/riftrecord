@@ -1,5 +1,5 @@
 import { clsx, type ClassValue } from 'clsx';
-import { TournamentRound, TournamentStats, MATCH_RESULTS } from '@/types';
+import { TournamentRound, TournamentStats, TournamentFullStats, MATCH_RESULTS, TopcutLevel } from '@/types';
 import { getLeaderColors } from '@/data/leaders';
 
 // Utility for combining class names
@@ -43,6 +43,32 @@ export function calculateTournamentStats(rounds: TournamentRound[]): TournamentS
     losses,
     record: `${wins}-${losses}`,
     winRate: Math.round(winRate * 10) / 10,
+  };
+}
+
+// Calculate full tournament statistics with swiss/topcut separation
+export function calculateFullTournamentStats(rounds: TournamentRound[]): TournamentFullStats {
+  const swissRounds = rounds.filter((r) => r.roundType === 'swiss');
+  const topcutRounds = rounds.filter((r) => r.roundType === 'topcut');
+
+  const swiss = calculateTournamentStats(swissRounds);
+  const topcut = calculateTournamentStats(topcutRounds);
+  const overall = calculateTournamentStats(rounds);
+
+  // Determine final placement based on topcut results
+  let finalPlacement: TopcutLevel | undefined;
+  if (topcutRounds.length > 0) {
+    const lastTopcutRound = topcutRounds[topcutRounds.length - 1];
+    if (lastTopcutRound.topcutLevel) {
+      finalPlacement = lastTopcutRound.topcutLevel;
+    }
+  }
+
+  return {
+    swiss,
+    topcut,
+    overall,
+    finalPlacement,
   };
 }
 

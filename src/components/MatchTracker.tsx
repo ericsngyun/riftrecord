@@ -22,7 +22,12 @@ export function MatchTracker({ onViewResults, onReset }: MatchTrackerProps) {
 
   const playerLeader = getLeaderById(tournament.playerLeaderId);
   const formatLabel = TOURNAMENT_FORMATS[tournament.format];
-  const nextRound = tournament.rounds.length + 1;
+
+  // Calculate next round numbers for swiss and topcut
+  const swissRounds = tournament.rounds.filter((r) => r.roundType === 'swiss');
+  const topcutRounds = tournament.rounds.filter((r) => r.roundType === 'topcut');
+  const nextSwissRound = swissRounds.length + 1;
+  const nextTopcutRound = topcutRounds.length + 1;
 
   return (
     <div className="space-y-8 animate-fadeIn">
@@ -72,7 +77,10 @@ export function MatchTracker({ onViewResults, onReset }: MatchTrackerProps) {
       </div>
 
       {/* Round Entry */}
-      <RoundEntry roundNumber={nextRound} />
+      <RoundEntry
+        swissRoundNumber={nextSwissRound}
+        topcutRoundNumber={nextTopcutRound}
+      />
 
       {/* Rounds List */}
       <RoundsList

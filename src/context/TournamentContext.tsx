@@ -6,6 +6,8 @@ import {
   TournamentRound,
   TournamentFormat,
   MatchResult,
+  RoundType,
+  TopcutLevel,
 } from '@/types';
 import {
   generateId,
@@ -19,12 +21,21 @@ interface TournamentState {
   isLoading: boolean;
 }
 
+// Round addition payload
+interface AddRoundPayload {
+  opponentLeaderId: string;
+  result: MatchResult;
+  roundType: RoundType;
+  topcutLevel?: TopcutLevel;
+  notes?: string;
+}
+
 // Action types
 type TournamentAction =
   | { type: 'LOAD_TOURNAMENT'; payload: Tournament | null }
   | { type: 'CREATE_TOURNAMENT'; payload: { title: string; format: TournamentFormat; playerLeaderId: string } }
   | { type: 'UPDATE_TOURNAMENT'; payload: Partial<Tournament> }
-  | { type: 'ADD_ROUND'; payload: { opponentLeaderId: string; result: MatchResult; notes?: string } }
+  | { type: 'ADD_ROUND'; payload: AddRoundPayload }
   | { type: 'UPDATE_ROUND'; payload: { roundId: string; updates: Partial<TournamentRound> } }
   | { type: 'DELETE_ROUND'; payload: { roundId: string } }
   | { type: 'RESET_TOURNAMENT' }
@@ -35,6 +46,12 @@ const initialState: TournamentState = {
   tournament: null,
   isLoading: true,
 };
+
+// Helper to calculate round numbers separately for swiss and topcut
+function getNextRoundNumber(rounds: TournamentRound[], roundType: RoundType): number {
+  const sameTypeRounds = rounds.filter((r) => r.roundType === roundType);
+  return sameTypeRounds.length + 1;
+}
 
 // Reducer
 function tournamentReducer(state: TournamentState, action: TournamentAction): TournamentState {
@@ -78,9 +95,11 @@ function tournamentReducer(state: TournamentState, action: TournamentAction): To
       if (!state.tournament) return state;
       const newRound: TournamentRound = {
         id: generateId(),
-        roundNumber: state.tournament.rounds.length + 1,
+        roundNumber: getNextRoundNumber(state.tournament.rounds, action.payload.roundType),
+        roundType: action.payload.roundType,
         opponentLeaderId: action.payload.opponentLeaderId,
         result: action.payload.result,
+        topcutLevel: action.payload.topcutLevel,
         notes: action.payload.notes,
       };
       return {
@@ -111,14 +130,34 @@ function tournamentReducer(state: TournamentState, action: TournamentAction): To
 
     case 'DELETE_ROUND': {
       if (!state.tournament) return state;
-      const filteredRounds = state.tournament.rounds
-        .filter((round) => round.id !== action.payload.roundId)
-        .map((round, index) => ({ ...round, roundNumber: index + 1 }));
+      const roundToDelete = state.tournament.rounds.find(
+        (r) => r.id === action.payload.roundId
+      );
+      if (!roundToDelete) return state;
+
+      // Filter out the deleted round and renumber remaining rounds of the same type
+      const filteredRounds = state.tournament.rounds.filter(
+        (round) => round.id !== action.payload.roundId
+      );
+
+      // Renumber rounds of the same type
+      let swissCount = 0;
+      let topcutCount = 0;
+      const renumberedRounds = filteredRounds.map((round) => {
+        if (round.roundType === 'swiss') {
+          swissCount++;
+          return { ...round, roundNumber: swissCount };
+        } else {
+          topcutCount++;
+          return { ...round, roundNumber: topcutCount };
+        }
+      });
+
       return {
         ...state,
         tournament: {
           ...state.tournament,
-          rounds: filteredRounds,
+          rounds: renumberedRounds,
           updatedAt: new Date().toISOString(),
         },
       };
@@ -146,7 +185,13 @@ interface TournamentContextValue {
   state: TournamentState;
   createTournament: (title: string, format: TournamentFormat, playerLeaderId: string) => void;
   updateTournament: (updates: Partial<Tournament>) => void;
-  addRound: (opponentLeaderId: string, result: MatchResult, notes?: string) => void;
+  addRound: (
+    opponentLeaderId: string,
+    result: MatchResult,
+    roundType: RoundType,
+    topcutLevel?: TopcutLevel,
+    notes?: string
+  ) => void;
   updateRound: (roundId: string, updates: Partial<TournamentRound>) => void;
   deleteRound: (roundId: string) => void;
   resetTournament: () => void;
@@ -179,8 +224,17 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'UPDATE_TOURNAMENT', payload: updates });
   };
 
-  const addRound = (opponentLeaderId: string, result: MatchResult, notes?: string) => {
-    dispatch({ type: 'ADD_ROUND', payload: { opponentLeaderId, result, notes } });
+  const addRound = (
+    opponentLeaderId: string,
+    result: MatchResult,
+    roundType: RoundType,
+    topcutLevel?: TopcutLevel,
+    notes?: string
+  ) => {
+    dispatch({
+      type: 'ADD_ROUND',
+      payload: { opponentLeaderId, result, roundType, topcutLevel, notes },
+    });
   };
 
   const updateRound = (roundId: string, updates: Partial<TournamentRound>) => {

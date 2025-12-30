@@ -1,112 +1,92 @@
-'use client';
+import Link from 'next/link';
+import { auth } from '@/auth';
+import { redirect } from 'next/navigation';
+import { Swords, Trophy, Share2, BarChart3 } from 'lucide-react';
 
-import { useState, useMemo, useCallback } from 'react';
-import { useTournament } from '@/context/TournamentContext';
-import { TournamentSetup, MatchTracker, TournamentResults } from '@/components';
-import { Swords, RotateCcw } from 'lucide-react';
+export default async function HomePage() {
+  const session = await auth();
 
-type AppView = 'setup' | 'tracker' | 'results';
-
-export default function Home() {
-  const { state, resetTournament } = useTournament();
-  const { tournament, isLoading } = state;
-  const [manualView, setManualView] = useState<AppView | null>(null);
-  const [showResetConfirm, setShowResetConfirm] = useState(false);
-
-  // Compute the current view based on state and manual overrides
-  const view = useMemo((): AppView => {
-    if (manualView) return manualView;
-    if (isLoading) return 'setup';
-    return tournament ? 'tracker' : 'setup';
-  }, [manualView, isLoading, tournament]);
-
-  const setView = useCallback((newView: AppView) => {
-    setManualView(newView);
-  }, []);
-
-  const handleReset = () => {
-    if (showResetConfirm) {
-      resetTournament();
-      setManualView(null); // Reset to auto-computed view
-      setShowResetConfirm(false);
-    } else {
-      setShowResetConfirm(true);
-      setTimeout(() => setShowResetConfirm(false), 3000);
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-foreground-muted">Loading...</div>
-      </div>
-    );
+  // If logged in, redirect to dashboard
+  if (session?.user) {
+    redirect('/dashboard');
   }
 
   return (
-    <main className="min-h-screen py-8 px-4">
-      <div className="max-w-2xl mx-auto">
-        {/* App Header */}
-        {view === 'setup' && (
-          <header className="text-center mb-12">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <Swords className="w-10 h-10 text-accent-primary" />
-              <h1 className="text-4xl font-bold gradient-text">RiftRecord</h1>
+    <div className="bg-app min-h-screen">
+      <div className="bg-app-overlay min-h-screen flex flex-col">
+        {/* Header */}
+        <header className="px-6 py-4">
+          <div className="max-w-6xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Swords className="w-8 h-8 text-accent-primary" />
+              <span className="text-xl font-bold text-foreground">RiftRecord</span>
             </div>
-            <p className="text-foreground-secondary text-lg">
-              Track your Riftbound TCG tournament matches
-            </p>
-            <p className="text-foreground-muted text-sm mt-2">
-              Record matchups, generate shareable results, dominate the meta
-            </p>
-          </header>
-        )}
+            <Link href="/login" className="btn btn-primary">
+              Sign In
+            </Link>
+          </div>
+        </header>
 
-        {/* Reset Confirmation Banner */}
-        {showResetConfirm && view === 'tracker' && (
-          <div className="mb-4 p-3 bg-accent-warning/10 border border-accent-warning/30 rounded-lg flex items-center justify-between animate-fadeIn">
-            <span className="text-sm text-accent-warning">
-              Click again to start a new tournament (current data will be lost)
-            </span>
-            <button
-              type="button"
-              onClick={handleReset}
-              className="btn btn-danger text-sm py-1.5 px-3"
+        {/* Hero Section */}
+        <main className="flex-1 flex items-center justify-center px-6">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6 animate-fadeIn">
+              Track Your Tournament Journey
+            </h1>
+            <p className="text-lg md:text-xl text-foreground-secondary mb-8 max-w-2xl mx-auto animate-fadeIn">
+              Record your Riftbound TCG tournament matches, track your performance from Swiss rounds through Top Cut, and share your results with the community.
+            </p>
+
+            {/* CTA Button */}
+            <Link
+              href="/login"
+              className="btn btn-primary text-lg py-4 px-8 animate-pulse-glow"
             >
-              <RotateCcw className="w-4 h-4" />
-              Confirm Reset
-            </button>
+              Get Started
+            </Link>
+
+            {/* Feature Cards */}
+            <div className="grid md:grid-cols-3 gap-6 mt-16">
+              <div className="card-glass p-6 animate-fadeIn">
+                <Trophy className="w-10 h-10 text-accent-warning mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-foreground mb-2">
+                  Track Every Match
+                </h3>
+                <p className="text-foreground-muted text-sm">
+                  Log Swiss rounds and Top Cut games with opponent details and results
+                </p>
+              </div>
+
+              <div className="card-glass p-6 animate-fadeIn" style={{ animationDelay: '0.1s' }}>
+                <BarChart3 className="w-10 h-10 text-accent-primary mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-foreground mb-2">
+                  Analyze Performance
+                </h3>
+                <p className="text-foreground-muted text-sm">
+                  View your win rates, matchup stats, and tournament history
+                </p>
+              </div>
+
+              <div className="card-glass p-6 animate-fadeIn" style={{ animationDelay: '0.2s' }}>
+                <Share2 className="w-10 h-10 text-accent-secondary mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-foreground mb-2">
+                  Share Results
+                </h3>
+                <p className="text-foreground-muted text-sm">
+                  Generate beautiful tournament summary images for Twitter/X
+                </p>
+              </div>
+            </div>
           </div>
-        )}
-
-        {/* View Content */}
-        {view === 'setup' && (
-          <div className="card">
-            <h2 className="text-xl font-semibold text-foreground mb-6">
-              Tournament Setup
-            </h2>
-            <TournamentSetup onComplete={() => setView('tracker')} />
-          </div>
-        )}
-
-        {view === 'tracker' && tournament && (
-          <MatchTracker
-            onViewResults={() => setView('results')}
-            onReset={handleReset}
-          />
-        )}
-
-        {view === 'results' && tournament && (
-          <TournamentResults onBack={() => setView('tracker')} />
-        )}
+        </main>
 
         {/* Footer */}
-        <footer className="mt-16 text-center text-foreground-muted text-sm">
-          <p>
+        <footer className="px-6 py-8 text-center">
+          <p className="text-foreground-muted text-sm">
             Built for the Riftbound community
           </p>
         </footer>
       </div>
-    </main>
+    </div>
   );
 }

@@ -1,10 +1,10 @@
 'use client';
 
-import { TournamentRound, MATCH_RESULTS } from '@/types';
+import { TournamentRound, MATCH_RESULTS, TOPCUT_LEVEL_OPTIONS } from '@/types';
 import { getLeaderById } from '@/data/leaders';
 import { generateMatchupGradient, cn, isWin } from '@/lib/utils';
 import { LeaderCard } from './LeaderCard';
-import { Trash2, MessageSquare, Swords } from 'lucide-react';
+import { Trash2, MessageSquare, Swords, Trophy } from 'lucide-react';
 
 interface MatchupCardProps {
   round: TournamentRound;
@@ -24,6 +24,10 @@ export function MatchupCard({
   const opponentLeader = getLeaderById(round.opponentLeaderId);
   const resultInfo = MATCH_RESULTS.find((r) => r.value === round.result);
   const won = isWin(round.result);
+  const isTopcut = round.roundType === 'topcut';
+  const topcutInfo = isTopcut && round.topcutLevel
+    ? TOPCUT_LEVEL_OPTIONS.find((t) => t.value === round.topcutLevel)
+    : null;
 
   if (!playerLeader || !opponentLeader) return null;
 
@@ -35,13 +39,24 @@ export function MatchupCard({
         className={cn(
           'relative rounded-lg overflow-hidden p-3',
           'border transition-all',
-          won ? 'border-accent-success/30' : 'border-accent-danger/30'
+          isTopcut
+            ? 'border-accent-warning/50'
+            : won
+              ? 'border-accent-success/30'
+              : 'border-accent-danger/30'
         )}
         style={{ background: gradient }}
       >
         <div className="relative z-10 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-white/70">R{round.roundNumber}</span>
+            {isTopcut ? (
+              <span className="text-xs font-medium text-amber-400 flex items-center gap-1">
+                <Trophy className="w-3 h-3" />
+                {topcutInfo?.shortLabel}
+              </span>
+            ) : (
+              <span className="text-xs font-medium text-white/70">R{round.roundNumber}</span>
+            )}
             <span className="text-sm font-semibold text-white">
               vs {opponentLeader.name}
             </span>
@@ -66,7 +81,11 @@ export function MatchupCard({
       className={cn(
         'relative rounded-xl overflow-hidden animate-slideIn',
         'border-2 transition-all',
-        won ? 'border-accent-success/50' : 'border-accent-danger/50'
+        isTopcut
+          ? 'border-accent-warning/70'
+          : won
+            ? 'border-accent-success/50'
+            : 'border-accent-danger/50'
       )}
     >
       {/* Gradient background */}
@@ -82,9 +101,16 @@ export function MatchupCard({
       <div className="relative z-10 p-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <span className="text-sm font-medium text-white/70 bg-white/10 px-2 py-0.5 rounded">
-            Round {round.roundNumber}
-          </span>
+          {isTopcut ? (
+            <span className="badge-topcut flex items-center gap-1.5">
+              <Trophy className="w-3.5 h-3.5" />
+              {topcutInfo?.label || 'Top Cut'}
+            </span>
+          ) : (
+            <span className="badge-swiss">
+              Round {round.roundNumber}
+            </span>
+          )}
           <span
             className={cn(
               'text-lg font-bold px-3 py-1 rounded-lg',

@@ -8,3 +8,4 @@ export { MatchupCard } from './MatchupCard';
 export { RoundsList } from './RoundsList';
 export { MatchTracker } from './MatchTracker';
 export { TournamentResults } from './TournamentResults';
+export { Providers } from './Providers';
