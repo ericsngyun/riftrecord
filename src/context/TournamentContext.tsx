@@ -1,0 +1,225 @@
+'use client';
+
+import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import {
+  Tournament,
+  TournamentRound,
+  TournamentFormat,
+  MatchResult,
+} from '@/types';
+import {
+  generateId,
+  saveTournamentToStorage,
+  loadTournamentFromStorage,
+} from '@/lib/utils';
+
+// State shape
+interface TournamentState {
+  tournament: Tournament | null;
+  isLoading: boolean;
+}
+
+// Action types
+type TournamentAction =
+  | { type: 'LOAD_TOURNAMENT'; payload: Tournament | null }
+  | { type: 'CREATE_TOURNAMENT'; payload: { title: string; format: TournamentFormat; playerLeaderId: string } }
+  | { type: 'UPDATE_TOURNAMENT'; payload: Partial<Tournament> }
+  | { type: 'ADD_ROUND'; payload: { opponentLeaderId: string; result: MatchResult; notes?: string } }
+  | { type: 'UPDATE_ROUND'; payload: { roundId: string; updates: Partial<TournamentRound> } }
+  | { type: 'DELETE_ROUND'; payload: { roundId: string } }
+  | { type: 'RESET_TOURNAMENT' }
+  | { type: 'SET_LOADING'; payload: boolean };
+
+// Initial state
+const initialState: TournamentState = {
+  tournament: null,
+  isLoading: true,
+};
+
+// Reducer
+function tournamentReducer(state: TournamentState, action: TournamentAction): TournamentState {
+  switch (action.type) {
+    case 'LOAD_TOURNAMENT':
+      return {
+        ...state,
+        tournament: action.payload,
+        isLoading: false,
+      };
+
+    case 'CREATE_TOURNAMENT': {
+      const now = new Date().toISOString();
+      const newTournament: Tournament = {
+        id: generateId(),
+        title: action.payload.title,
+        format: action.payload.format,
+        playerLeaderId: action.payload.playerLeaderId,
+        rounds: [],
+        createdAt: now,
+        updatedAt: now,
+      };
+      return {
+        ...state,
+        tournament: newTournament,
+      };
+    }
+
+    case 'UPDATE_TOURNAMENT':
+      if (!state.tournament) return state;
+      return {
+        ...state,
+        tournament: {
+          ...state.tournament,
+          ...action.payload,
+          updatedAt: new Date().toISOString(),
+        },
+      };
+
+    case 'ADD_ROUND': {
+      if (!state.tournament) return state;
+      const newRound: TournamentRound = {
+        id: generateId(),
+        roundNumber: state.tournament.rounds.length + 1,
+        opponentLeaderId: action.payload.opponentLeaderId,
+        result: action.payload.result,
+        notes: action.payload.notes,
+      };
+      return {
+        ...state,
+        tournament: {
+          ...state.tournament,
+          rounds: [...state.tournament.rounds, newRound],
+          updatedAt: new Date().toISOString(),
+        },
+      };
+    }
+
+    case 'UPDATE_ROUND': {
+      if (!state.tournament) return state;
+      return {
+        ...state,
+        tournament: {
+          ...state.tournament,
+          rounds: state.tournament.rounds.map((round) =>
+            round.id === action.payload.roundId
+              ? { ...round, ...action.payload.updates }
+              : round
+          ),
+          updatedAt: new Date().toISOString(),
+        },
+      };
+    }
+
+    case 'DELETE_ROUND': {
+      if (!state.tournament) return state;
+      const filteredRounds = state.tournament.rounds
+        .filter((round) => round.id !== action.payload.roundId)
+        .map((round, index) => ({ ...round, roundNumber: index + 1 }));
+      return {
+        ...state,
+        tournament: {
+          ...state.tournament,
+          rounds: filteredRounds,
+          updatedAt: new Date().toISOString(),
+        },
+      };
+    }
+
+    case 'RESET_TOURNAMENT':
+      return {
+        ...state,
+        tournament: null,
+      };
+
+    case 'SET_LOADING':
+      return {
+        ...state,
+        isLoading: action.payload,
+      };
+
+    default:
+      return state;
+  }
+}
+
+// Context
+interface TournamentContextValue {
+  state: TournamentState;
+  createTournament: (title: string, format: TournamentFormat, playerLeaderId: string) => void;
+  updateTournament: (updates: Partial<Tournament>) => void;
+  addRound: (opponentLeaderId: string, result: MatchResult, notes?: string) => void;
+  updateRound: (roundId: string, updates: Partial<TournamentRound>) => void;
+  deleteRound: (roundId: string) => void;
+  resetTournament: () => void;
+}
+
+const TournamentContext = createContext<TournamentContextValue | undefined>(undefined);
+
+// Provider component
+export function TournamentProvider({ children }: { children: ReactNode }) {
+  const [state, dispatch] = useReducer(tournamentReducer, initialState);
+
+  // Load from localStorage on mount
+  useEffect(() => {
+    const saved = loadTournamentFromStorage();
+    dispatch({ type: 'LOAD_TOURNAMENT', payload: saved as Tournament | null });
+  }, []);
+
+  // Save to localStorage on changes
+  useEffect(() => {
+    if (!state.isLoading && state.tournament) {
+      saveTournamentToStorage(state.tournament);
+    }
+  }, [state.tournament, state.isLoading]);
+
+  const createTournament = (title: string, format: TournamentFormat, playerLeaderId: string) => {
+    dispatch({ type: 'CREATE_TOURNAMENT', payload: { title, format, playerLeaderId } });
+  };
+
+  const updateTournament = (updates: Partial<Tournament>) => {
+    dispatch({ type: 'UPDATE_TOURNAMENT', payload: updates });
+  };
+
+  const addRound = (opponentLeaderId: string, result: MatchResult, notes?: string) => {
+    dispatch({ type: 'ADD_ROUND', payload: { opponentLeaderId, result, notes } });
+  };
+
+  const updateRound = (roundId: string, updates: Partial<TournamentRound>) => {
+    dispatch({ type: 'UPDATE_ROUND', payload: { roundId, updates } });
+  };
+
+  const deleteRound = (roundId: string) => {
+    dispatch({ type: 'DELETE_ROUND', payload: { roundId } });
+  };
+
+  const resetTournament = () => {
+    dispatch({ type: 'RESET_TOURNAMENT' });
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('riftrecord_tournament');
+    }
+  };
+
+  return (
+    <TournamentContext.Provider
+      value={{
+        state,
+        createTournament,
+        updateTournament,
+        addRound,
+        updateRound,
+        deleteRound,
+        resetTournament,
+      }}
+    >
+      {children}
+    </TournamentContext.Provider>
+  );
+}
+
+// Custom hook for using the context
+export function useTournament() {
+  const context = useContext(TournamentContext);
+  if (context === undefined) {
+    throw new Error('useTournament must be used within a TournamentProvider');
+  }
+  return context;
+}
