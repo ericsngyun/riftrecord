@@ -59,7 +59,6 @@ export function LandingAnimations() {
           zIndex: 0,
         }}
       >
-        {/* Orb 1 - Rose */}
         <div
           style={{
             position: 'absolute',
@@ -73,7 +72,6 @@ export function LandingAnimations() {
             animation: 'orb1 20s ease-in-out infinite',
           }}
         />
-        {/* Orb 2 - Cyan */}
         <div
           style={{
             position: 'absolute',
@@ -87,7 +85,6 @@ export function LandingAnimations() {
             animation: 'orb2 25s ease-in-out infinite',
           }}
         />
-        {/* Orb 3 - Fuchsia */}
         <div
           style={{
             position: 'absolute',
@@ -162,7 +159,6 @@ export function LandingAnimations() {
         }}
       />
 
-      {/* Keyframes */}
       <style jsx global>{`
         @keyframes aurora-spin {
           from { transform: rotate(0deg); }
@@ -220,30 +216,236 @@ export function LandingAnimations() {
           50% { transform: translateX(-100%); opacity: 0.5; }
           60%, 100% { opacity: 0; }
         }
-
-        @keyframes fade-in-up {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .animate-fade-in-up {
-          animation: fade-in-up 0.8s ease-out forwards;
-        }
-
-        .animate-delay-100 { animation-delay: 0.1s; }
-        .animate-delay-200 { animation-delay: 0.2s; }
-        .animate-delay-300 { animation-delay: 0.3s; }
-        .animate-delay-400 { animation-delay: 0.4s; }
-        .animate-delay-500 { animation-delay: 0.5s; }
-        .animate-delay-600 { animation-delay: 0.6s; }
       `}</style>
     </>
+  );
+}
+
+// Loading Screen Component
+export function LoadingScreen({ onComplete }: { onComplete: () => void }) {
+  const [phase, setPhase] = useState<'loading' | 'complete' | 'exit'>('loading');
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    // Animate progress bar
+    const progressInterval = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(progressInterval);
+          return 100;
+        }
+        // Ease out effect - slower as it approaches 100
+        const increment = Math.max(1, (100 - prev) / 10);
+        return Math.min(100, prev + increment);
+      });
+    }, 50);
+
+    // Complete phase after progress done
+    const completeTimer = setTimeout(() => {
+      setPhase('complete');
+    }, 1800);
+
+    // Exit phase
+    const exitTimer = setTimeout(() => {
+      setPhase('exit');
+    }, 2400);
+
+    // Call onComplete
+    const finalTimer = setTimeout(() => {
+      onComplete();
+    }, 3000);
+
+    return () => {
+      clearInterval(progressInterval);
+      clearTimeout(completeTimer);
+      clearTimeout(exitTimer);
+      clearTimeout(finalTimer);
+    };
+  }, [onComplete]);
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 100,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#0a0a0e',
+        opacity: phase === 'exit' ? 0 : 1,
+        transform: phase === 'exit' ? 'scale(1.1)' : 'scale(1)',
+        transition: 'opacity 0.6s ease-out, transform 0.6s ease-out',
+        pointerEvents: phase === 'exit' ? 'none' : 'auto',
+      }}
+    >
+      {/* Background Glow */}
+      <div
+        style={{
+          position: 'absolute',
+          width: '600px',
+          height: '600px',
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(244, 63, 94, 0.15) 0%, transparent 70%)',
+          filter: 'blur(80px)',
+          animation: 'pulse-glow 2s ease-in-out infinite',
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          width: '400px',
+          height: '400px',
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(6, 182, 212, 0.1) 0%, transparent 70%)',
+          filter: 'blur(60px)',
+          animation: 'pulse-glow 2s ease-in-out infinite 0.5s',
+        }}
+      />
+
+      {/* Logo */}
+      <div
+        style={{
+          position: 'relative',
+          marginBottom: '48px',
+          opacity: phase === 'complete' ? 1 : 0.9,
+          transform: phase === 'complete' ? 'scale(1.05)' : 'scale(1)',
+          transition: 'all 0.5s ease-out',
+        }}
+      >
+        {/* Logo Ring */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: '-20px',
+            borderRadius: '50%',
+            border: '1px solid rgba(244, 63, 94, 0.3)',
+            animation: 'spin-slow 8s linear infinite',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            inset: '-35px',
+            borderRadius: '50%',
+            border: '1px solid rgba(6, 182, 212, 0.2)',
+            animation: 'spin-slow 12s linear infinite reverse',
+          }}
+        />
+
+        {/* Logo Text */}
+        <div
+          style={{
+            fontSize: '3rem',
+            fontWeight: 300,
+            letterSpacing: '-0.02em',
+            animation: 'text-glow 2s ease-in-out infinite',
+          }}
+        >
+          <span style={{ color: '#f43f5e' }}>Rift</span>
+          <span style={{ color: '#ffffff', fontWeight: 500 }}>Record</span>
+        </div>
+      </div>
+
+      {/* Progress Container */}
+      <div
+        style={{
+          width: '200px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '16px',
+        }}
+      >
+        {/* Progress Bar */}
+        <div
+          style={{
+            width: '100%',
+            height: '2px',
+            background: 'rgba(255, 255, 255, 0.1)',
+            borderRadius: '1px',
+            overflow: 'hidden',
+          }}
+        >
+          <div
+            style={{
+              width: `${progress}%`,
+              height: '100%',
+              background: 'linear-gradient(90deg, #f43f5e, #d946ef, #06b6d4)',
+              borderRadius: '1px',
+              transition: 'width 0.1s ease-out',
+              boxShadow: '0 0 20px rgba(244, 63, 94, 0.5)',
+            }}
+          />
+        </div>
+
+        {/* Loading Text */}
+        <div
+          style={{
+            fontSize: '0.75rem',
+            color: 'rgba(255, 255, 255, 0.4)',
+            fontWeight: 300,
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
+          }}
+        >
+          {phase === 'complete' ? 'Welcome' : 'Loading'}
+        </div>
+      </div>
+
+      {/* Animated Particles */}
+      <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            style={{
+              position: 'absolute',
+              width: '2px',
+              height: '2px',
+              background: i % 2 === 0 ? 'rgba(244, 63, 94, 0.6)' : 'rgba(6, 182, 212, 0.6)',
+              borderRadius: '50%',
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animation: `float-particle ${3 + Math.random() * 4}s ease-in-out infinite`,
+              animationDelay: `${Math.random() * 2}s`,
+            }}
+          />
+        ))}
+      </div>
+
+      <style jsx>{`
+        @keyframes pulse-glow {
+          0%, 100% { opacity: 0.5; transform: scale(1); }
+          50% { opacity: 0.8; transform: scale(1.05); }
+        }
+
+        @keyframes spin-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+
+        @keyframes text-glow {
+          0%, 100% {
+            text-shadow: 0 0 20px rgba(244, 63, 94, 0.3), 0 0 40px rgba(244, 63, 94, 0.1);
+          }
+          50% {
+            text-shadow: 0 0 30px rgba(244, 63, 94, 0.5), 0 0 60px rgba(244, 63, 94, 0.2);
+          }
+        }
+
+        @keyframes float-particle {
+          0%, 100% {
+            transform: translate(0, 0) scale(1);
+            opacity: 0.3;
+          }
+          50% {
+            transform: translate(${Math.random() > 0.5 ? '' : '-'}${20 + Math.random() * 30}px, ${Math.random() > 0.5 ? '' : '-'}${20 + Math.random() * 30}px) scale(1.5);
+            opacity: 0.8;
+          }
+        }
+      `}</style>
+    </div>
   );
 }
 
@@ -272,5 +474,31 @@ export function AnimatedContent({ children, delay = 0, className = '' }: Animate
     >
       {children}
     </div>
+  );
+}
+
+// Main wrapper that handles loading -> content transition
+export function LandingWrapper({ children }: { children: React.ReactNode }) {
+  const [isLoading, setIsLoading] = useState(true);
+  const [showContent, setShowContent] = useState(false);
+
+  const handleLoadingComplete = () => {
+    setIsLoading(false);
+    // Small delay before showing content animations
+    setTimeout(() => setShowContent(true), 100);
+  };
+
+  return (
+    <>
+      {isLoading && <LoadingScreen onComplete={handleLoadingComplete} />}
+      <div
+        style={{
+          opacity: showContent ? 1 : 0,
+          transition: 'opacity 0.5s ease-out',
+        }}
+      >
+        {children}
+      </div>
+    </>
   );
 }

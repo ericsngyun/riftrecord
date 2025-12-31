@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
-import { LandingAnimations, AnimatedContent } from '@/components/LandingAnimations';
+import { LandingAnimations, AnimatedContent, LandingWrapper } from '@/components/LandingAnimations';
 
 export default async function HomePage() {
   const session = await auth();
@@ -11,192 +11,194 @@ export default async function HomePage() {
   }
 
   return (
-    <div
-      className="min-h-screen relative overflow-hidden"
-      style={{
-        backgroundImage: "url('/background.jpg')",
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed',
-        backgroundRepeat: 'no-repeat',
-      }}
-    >
-      {/* Animated Background Elements */}
-      <LandingAnimations />
-
-      {/* Content Overlay */}
+    <LandingWrapper>
       <div
-        className="min-h-screen flex flex-col relative z-10"
+        className="min-h-screen relative overflow-hidden"
         style={{
-          background: 'linear-gradient(135deg, rgba(15, 10, 20, 0.7) 0%, rgba(20, 15, 25, 0.5) 50%, rgba(15, 20, 25, 0.7) 100%)',
+          backgroundImage: "url('/background.jpg')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed',
+          backgroundRepeat: 'no-repeat',
         }}
       >
-        {/* Header */}
-        <header className="px-8 py-6">
-          <AnimatedContent delay={0}>
-            <nav className="max-w-6xl mx-auto flex items-center justify-between">
-              <span
-                className="text-2xl tracking-tight"
-                style={{ fontWeight: 300 }}
-              >
-                <span className="text-rose-400">Rift</span>
-                <span className="text-white" style={{ fontWeight: 500 }}>Record</span>
-              </span>
-              <Link
-                href="/login"
-                className="px-5 py-2 text-sm tracking-wide border border-rose-400/40 text-rose-300 hover:bg-rose-400/20 hover:border-rose-400/60 transition-all duration-300 rounded"
-                style={{ fontWeight: 400 }}
-              >
-                Sign In
-              </Link>
-            </nav>
-          </AnimatedContent>
-        </header>
+        {/* Animated Background Elements */}
+        <LandingAnimations />
 
-        {/* Hero */}
-        <main className="flex-1 flex items-center justify-center px-8">
-          <div className="max-w-3xl mx-auto text-center">
-            {/* Tagline */}
+        {/* Content Overlay */}
+        <div
+          className="min-h-screen flex flex-col relative z-10"
+          style={{
+            background: 'linear-gradient(135deg, rgba(15, 10, 20, 0.7) 0%, rgba(20, 15, 25, 0.5) 50%, rgba(15, 20, 25, 0.7) 100%)',
+          }}
+        >
+          {/* Header */}
+          <header className="px-8 py-6">
             <AnimatedContent delay={100}>
-              <p
-                className="text-xs tracking-[0.3em] uppercase text-cyan-400/80 mb-6"
-                style={{ fontWeight: 500 }}
-              >
-                Tournament Tracking for Riftbound
-              </p>
-            </AnimatedContent>
-
-            {/* Main Headline */}
-            <AnimatedContent delay={200}>
-              <h1
-                className="text-5xl md:text-7xl mb-6 leading-tight"
-                style={{ fontWeight: 200, letterSpacing: '-0.02em' }}
-              >
-                <span className="text-white">Track every</span>
-                <br />
+              <nav className="max-w-6xl mx-auto flex items-center justify-between">
                 <span
-                  className="bg-gradient-to-r from-rose-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent"
+                  className="text-2xl tracking-tight"
                   style={{ fontWeight: 300 }}
                 >
-                  victory.
+                  <span className="text-rose-400">Rift</span>
+                  <span className="text-white" style={{ fontWeight: 500 }}>Record</span>
                 </span>
-              </h1>
+                <Link
+                  href="/login"
+                  className="px-5 py-2 text-sm tracking-wide border border-rose-400/40 text-rose-300 hover:bg-rose-400/20 hover:border-rose-400/60 transition-all duration-300 rounded"
+                  style={{ fontWeight: 400 }}
+                >
+                  Sign In
+                </Link>
+              </nav>
             </AnimatedContent>
+          </header>
 
-            {/* Description */}
-            <AnimatedContent delay={300}>
+          {/* Hero */}
+          <main className="flex-1 flex items-center justify-center px-8">
+            <div className="max-w-3xl mx-auto text-center">
+              {/* Tagline */}
+              <AnimatedContent delay={200}>
+                <p
+                  className="text-xs tracking-[0.3em] uppercase text-cyan-400/80 mb-6"
+                  style={{ fontWeight: 500 }}
+                >
+                  Tournament Tracking for Riftbound
+                </p>
+              </AnimatedContent>
+
+              {/* Main Headline */}
+              <AnimatedContent delay={350}>
+                <h1
+                  className="text-5xl md:text-7xl mb-6 leading-tight"
+                  style={{ fontWeight: 200, letterSpacing: '-0.02em' }}
+                >
+                  <span className="text-white">Track every</span>
+                  <br />
+                  <span
+                    className="bg-gradient-to-r from-rose-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent"
+                    style={{ fontWeight: 300 }}
+                  >
+                    victory.
+                  </span>
+                </h1>
+              </AnimatedContent>
+
+              {/* Description */}
+              <AnimatedContent delay={500}>
+                <p
+                  className="text-lg md:text-xl text-white/70 mb-10 max-w-xl mx-auto leading-relaxed"
+                  style={{ fontWeight: 300 }}
+                >
+                  Track every round from Swiss to Top Cut.
+                  <br className="hidden md:block" />
+                  Analyze your performance. Share your results.
+                </p>
+              </AnimatedContent>
+
+              {/* CTA */}
+              <AnimatedContent delay={650}>
+                <Link
+                  href="/login"
+                  className="btn-cta inline-block px-10 py-4 text-sm tracking-wide rounded-lg text-white transition-all duration-300"
+                  style={{ fontWeight: 500 }}
+                >
+                  Get Started
+                </Link>
+              </AnimatedContent>
+
+              {/* Features */}
+              <AnimatedContent delay={850}>
+                <div className="mt-20 grid md:grid-cols-3 gap-8">
+                  <div
+                    className="p-6 rounded-xl border border-white/10 hover:border-rose-400/30 transition-all duration-500 hover:-translate-y-1 cursor-default"
+                    style={{ background: 'rgba(255, 255, 255, 0.03)', backdropFilter: 'blur(4px)' }}
+                  >
+                    <p
+                      className="text-rose-400 text-xs tracking-[0.2em] uppercase mb-3"
+                      style={{ fontWeight: 500 }}
+                    >
+                      01
+                    </p>
+                    <h3
+                      className="text-white text-lg mb-2"
+                      style={{ fontWeight: 400 }}
+                    >
+                      Record
+                    </h3>
+                    <p
+                      className="text-white/50 text-sm leading-relaxed"
+                      style={{ fontWeight: 300 }}
+                    >
+                      Log matches with detailed results and opponent tracking
+                    </p>
+                  </div>
+
+                  <div
+                    className="p-6 rounded-xl border border-white/10 hover:border-cyan-400/30 transition-all duration-500 hover:-translate-y-1 cursor-default"
+                    style={{ background: 'rgba(255, 255, 255, 0.03)', backdropFilter: 'blur(4px)' }}
+                  >
+                    <p
+                      className="text-cyan-400 text-xs tracking-[0.2em] uppercase mb-3"
+                      style={{ fontWeight: 500 }}
+                    >
+                      02
+                    </p>
+                    <h3
+                      className="text-white text-lg mb-2"
+                      style={{ fontWeight: 400 }}
+                    >
+                      Analyze
+                    </h3>
+                    <p
+                      className="text-white/50 text-sm leading-relaxed"
+                      style={{ fontWeight: 300 }}
+                    >
+                      View win rates, matchup statistics, and performance trends
+                    </p>
+                  </div>
+
+                  <div
+                    className="p-6 rounded-xl border border-white/10 hover:border-fuchsia-400/30 transition-all duration-500 hover:-translate-y-1 cursor-default"
+                    style={{ background: 'rgba(255, 255, 255, 0.03)', backdropFilter: 'blur(4px)' }}
+                  >
+                    <p
+                      className="text-fuchsia-400 text-xs tracking-[0.2em] uppercase mb-3"
+                      style={{ fontWeight: 500 }}
+                    >
+                      03
+                    </p>
+                    <h3
+                      className="text-white text-lg mb-2"
+                      style={{ fontWeight: 400 }}
+                    >
+                      Share
+                    </h3>
+                    <p
+                      className="text-white/50 text-sm leading-relaxed"
+                      style={{ fontWeight: 300 }}
+                    >
+                      Export tournament summaries as images for social media
+                    </p>
+                  </div>
+                </div>
+              </AnimatedContent>
+            </div>
+          </main>
+
+          {/* Footer */}
+          <footer className="px-8 py-8">
+            <AnimatedContent delay={1000}>
               <p
-                className="text-lg md:text-xl text-white/70 mb-10 max-w-xl mx-auto leading-relaxed"
+                className="text-center text-white/30 text-xs tracking-wide"
                 style={{ fontWeight: 300 }}
               >
-                Track every round from Swiss to Top Cut.
-                <br className="hidden md:block" />
-                Analyze your performance. Share your results.
+                Built for the Riftbound community
               </p>
             </AnimatedContent>
-
-            {/* CTA */}
-            <AnimatedContent delay={400}>
-              <Link
-                href="/login"
-                className="btn-cta inline-block px-10 py-4 text-sm tracking-wide rounded-lg text-white transition-all duration-300"
-                style={{ fontWeight: 500 }}
-              >
-                Get Started
-              </Link>
-            </AnimatedContent>
-
-            {/* Features */}
-            <AnimatedContent delay={600}>
-              <div className="mt-20 grid md:grid-cols-3 gap-8">
-                <div
-                  className="p-6 rounded-xl border border-white/10 hover:border-rose-400/30 transition-all duration-500 hover:-translate-y-1 cursor-default"
-                  style={{ background: 'rgba(255, 255, 255, 0.03)', backdropFilter: 'blur(4px)' }}
-                >
-                  <p
-                    className="text-rose-400 text-xs tracking-[0.2em] uppercase mb-3"
-                    style={{ fontWeight: 500 }}
-                  >
-                    01
-                  </p>
-                  <h3
-                    className="text-white text-lg mb-2"
-                    style={{ fontWeight: 400 }}
-                  >
-                    Record
-                  </h3>
-                  <p
-                    className="text-white/50 text-sm leading-relaxed"
-                    style={{ fontWeight: 300 }}
-                  >
-                    Log matches with detailed results and opponent tracking
-                  </p>
-                </div>
-
-                <div
-                  className="p-6 rounded-xl border border-white/10 hover:border-cyan-400/30 transition-all duration-500 hover:-translate-y-1 cursor-default"
-                  style={{ background: 'rgba(255, 255, 255, 0.03)', backdropFilter: 'blur(4px)' }}
-                >
-                  <p
-                    className="text-cyan-400 text-xs tracking-[0.2em] uppercase mb-3"
-                    style={{ fontWeight: 500 }}
-                  >
-                    02
-                  </p>
-                  <h3
-                    className="text-white text-lg mb-2"
-                    style={{ fontWeight: 400 }}
-                  >
-                    Analyze
-                  </h3>
-                  <p
-                    className="text-white/50 text-sm leading-relaxed"
-                    style={{ fontWeight: 300 }}
-                  >
-                    View win rates, matchup statistics, and performance trends
-                  </p>
-                </div>
-
-                <div
-                  className="p-6 rounded-xl border border-white/10 hover:border-fuchsia-400/30 transition-all duration-500 hover:-translate-y-1 cursor-default"
-                  style={{ background: 'rgba(255, 255, 255, 0.03)', backdropFilter: 'blur(4px)' }}
-                >
-                  <p
-                    className="text-fuchsia-400 text-xs tracking-[0.2em] uppercase mb-3"
-                    style={{ fontWeight: 500 }}
-                  >
-                    03
-                  </p>
-                  <h3
-                    className="text-white text-lg mb-2"
-                    style={{ fontWeight: 400 }}
-                  >
-                    Share
-                  </h3>
-                  <p
-                    className="text-white/50 text-sm leading-relaxed"
-                    style={{ fontWeight: 300 }}
-                  >
-                    Export tournament summaries as images for social media
-                  </p>
-                </div>
-              </div>
-            </AnimatedContent>
-          </div>
-        </main>
-
-        {/* Footer */}
-        <footer className="px-8 py-8">
-          <AnimatedContent delay={700}>
-            <p
-              className="text-center text-white/30 text-xs tracking-wide"
-              style={{ fontWeight: 300 }}
-            >
-              Built for the Riftbound community
-            </p>
-          </AnimatedContent>
-        </footer>
+          </footer>
+        </div>
       </div>
-    </div>
+    </LandingWrapper>
   );
 }
