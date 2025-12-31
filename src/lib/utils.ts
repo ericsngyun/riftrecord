@@ -1,10 +1,19 @@
 import { clsx, type ClassValue } from 'clsx';
 import { TournamentRound, TournamentStats, TournamentFullStats, MATCH_RESULTS, TopcutLevel } from '@/types';
-import { getLeaderColors } from '@/data/leaders';
+import { getLeaderById, getLeaderColors, DOMAINS, type Leader } from '@/data/leaders';
 
 // Utility for combining class names
 export function cn(...inputs: ClassValue[]) {
   return clsx(inputs);
+}
+
+// Get colors for a leader by ID
+export function getLeaderColorsById(leaderId: string): [string, string] {
+  const leader = getLeaderById(leaderId);
+  if (!leader) {
+    return ['#6b7280', '#9ca3af']; // Default gray
+  }
+  return [DOMAINS[leader.domains[0]].color, DOMAINS[leader.domains[1]].color];
 }
 
 // Generate a gradient CSS string from two leaders' colors
@@ -13,19 +22,25 @@ export function generateMatchupGradient(
   opponentLeaderId: string,
   angle: number = 135
 ): string {
-  const [playerPrimary] = getLeaderColors(playerLeaderId);
-  const [opponentPrimary] = getLeaderColors(opponentLeaderId);
+  const [playerPrimary] = getLeaderColorsById(playerLeaderId);
+  const [opponentPrimary] = getLeaderColorsById(opponentLeaderId);
 
   return `linear-gradient(${angle}deg, ${playerPrimary} 0%, ${opponentPrimary} 100%)`;
 }
 
-// Generate a leader's color gradient
+// Generate a leader's color gradient by ID
 export function generateLeaderGradient(
   leaderId: string,
   angle: number = 135
 ): string {
-  const [primary, secondary] = getLeaderColors(leaderId);
+  const [primary, secondary] = getLeaderColorsById(leaderId);
   return `linear-gradient(${angle}deg, ${primary} 0%, ${secondary} 100%)`;
+}
+
+// Generate a leader's border gradient (for card borders)
+export function generateLeaderBorderGradient(leader: Leader): string {
+  const [color1, color2] = getLeaderColors(leader);
+  return `linear-gradient(135deg, ${color1}, ${color2})`;
 }
 
 // Calculate tournament statistics from rounds

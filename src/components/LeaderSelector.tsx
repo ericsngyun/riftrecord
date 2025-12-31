@@ -27,7 +27,7 @@ export function LeaderSelector({
     return LEADERS.filter(
       (leader) =>
         leader.name.toLowerCase().includes(query) ||
-        leader.title.toLowerCase().includes(query)
+        leader.displayName.toLowerCase().includes(query)
     );
   }, [searchQuery]);
 
@@ -48,10 +48,7 @@ export function LeaderSelector({
         <div className="flex items-center gap-3 p-3 bg-background-tertiary rounded-lg border border-border">
           <LeaderCard leader={selectedLeader} size="sm" showName={false} />
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-foreground">{selectedLeader.name}</p>
-            <p className="text-sm text-foreground-muted truncate">
-              {selectedLeader.title}
-            </p>
+            <p className="font-semibold text-foreground">{selectedLeader.displayName}</p>
           </div>
           <button
             type="button"
