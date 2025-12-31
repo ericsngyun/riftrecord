@@ -28,7 +28,7 @@ export default async function HomePage() {
       <div
         className="min-h-screen flex flex-col relative z-10"
         style={{
-          background: 'linear-gradient(135deg, rgba(15, 10, 20, 0.7) 0%, rgba(20, 15, 25, 0.5) 50%, rgba(15, 20, 25, 0.7) 100%)',
+          background: 'linear-gradient(135deg, rgba(15, 10, 20, 0.5) 0%, rgba(20, 15, 25, 0.35) 50%, rgba(15, 20, 25, 0.5) 100%)',
         }}
       >
         {/* Header */}
@@ -36,11 +36,11 @@ export default async function HomePage() {
           <AnimatedContent delay={100}>
             <nav className="max-w-6xl mx-auto flex items-center justify-between">
               <span
-                className="text-2xl tracking-tight"
-                style={{ fontWeight: 300 }}
+                className="text-3xl tracking-wide uppercase"
+                style={{ fontFamily: 'var(--font-display)', fontWeight: 700, letterSpacing: '0.05em' }}
               >
                 <span className="text-rose-400">Rift</span>
-                <span className="text-white" style={{ fontWeight: 500 }}>Record</span>
+                <span className="text-white">Record</span>
               </span>
               <Link
                 href="/login"
@@ -188,12 +188,21 @@ export default async function HomePage() {
         {/* Footer */}
         <footer className="px-8 py-8">
           <AnimatedContent delay={1000}>
-            <p
-              className="text-center text-white/30 text-xs tracking-wide"
-              style={{ fontWeight: 300 }}
-            >
-              Built for the Riftbound community
-            </p>
+            <div className="text-center space-y-2">
+              <p
+                className="text-white/30 text-xs tracking-wide"
+                style={{ fontWeight: 300 }}
+              >
+                Built for the Riftbound community
+              </p>
+              <p
+                className="text-white/20 text-[10px] leading-relaxed max-w-md mx-auto"
+                style={{ fontWeight: 300 }}
+              >
+                RiftRecord is not affiliated with, endorsed, or sponsored by Riot Games, Inc.
+                Riftbound and all related assets are trademarks of Riot Games, Inc.
+              </p>
+            </div>
           </AnimatedContent>
         </footer>
       </div>

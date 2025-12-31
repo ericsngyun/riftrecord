@@ -38,11 +38,11 @@ export default async function LoginPage() {
               &larr; Back
             </Link>
             <span
-              className="text-xl tracking-tight"
-              style={{ fontWeight: 300 }}
+              className="text-2xl tracking-wide uppercase"
+              style={{ fontFamily: 'var(--font-display)', fontWeight: 700, letterSpacing: '0.05em' }}
             >
               <span className="text-rose-400">Rift</span>
-              <span className="text-white" style={{ fontWeight: 500 }}>Record</span>
+              <span className="text-white">Record</span>
             </span>
             <div className="w-12" />
           </nav>
@@ -130,6 +130,17 @@ export default async function LoginPage() {
             </p>
           </div>
         </main>
+
+        {/* Footer */}
+        <footer className="px-8 py-6">
+          <p
+            className="text-center text-white/20 text-[10px] leading-relaxed max-w-md mx-auto"
+            style={{ fontWeight: 300 }}
+          >
+            RiftRecord is not affiliated with, endorsed, or sponsored by Riot Games, Inc.
+            Riftbound and all related assets are trademarks of Riot Games, Inc.
+          </p>
+        </footer>
       </div>
     </div>
   );
