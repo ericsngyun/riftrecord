@@ -11,7 +11,7 @@ export default async function HomePage() {
 
   return (
     <div
-      className="min-h-screen"
+      className="min-h-screen relative"
       style={{
         backgroundImage: "url('/background.jpg')",
         backgroundSize: 'cover',
@@ -20,19 +20,45 @@ export default async function HomePage() {
         backgroundRepeat: 'no-repeat',
       }}
     >
-      {/* Lighter overlay to show more background */}
+      {/* Animated Background Elements */}
+      <div className="aurora" />
+
+      <div className="orbs-container">
+        <div className="orb orb-1" />
+        <div className="orb orb-2" />
+        <div className="orb orb-3" />
+        <div className="orb orb-4" />
+      </div>
+
+      <div className="particles">
+        <div className="particle" />
+        <div className="particle" />
+        <div className="particle" />
+        <div className="particle" />
+        <div className="particle" />
+        <div className="particle" />
+        <div className="particle" />
+        <div className="particle" />
+        <div className="particle" />
+        <div className="particle" />
+      </div>
+
+      {/* Glow Lines */}
+      <div className="glow-line glow-line-top" />
+      <div className="glow-line glow-line-bottom" />
+
+      {/* Content Overlay */}
       <div
-        className="min-h-screen flex flex-col"
+        className="min-h-screen flex flex-col relative z-10"
         style={{
-          background: 'linear-gradient(135deg, rgba(15, 10, 20, 0.75) 0%, rgba(20, 15, 25, 0.65) 50%, rgba(15, 20, 25, 0.75) 100%)',
-          backdropFilter: 'blur(2px)',
+          background: 'linear-gradient(135deg, rgba(15, 10, 20, 0.7) 0%, rgba(20, 15, 25, 0.55) 50%, rgba(15, 20, 25, 0.7) 100%)',
         }}
       >
         {/* Header */}
         <header className="px-8 py-6">
           <nav className="max-w-6xl mx-auto flex items-center justify-between">
             <span
-              className="text-2xl tracking-tight"
+              className="text-2xl tracking-tight fade-in-up"
               style={{ fontWeight: 300 }}
             >
               <span className="text-rose-400">Rift</span>
@@ -40,7 +66,7 @@ export default async function HomePage() {
             </span>
             <Link
               href="/login"
-              className="px-5 py-2 text-sm tracking-wide border border-rose-400/40 text-rose-300 hover:bg-rose-400/20 hover:border-rose-400/60 transition-all duration-300 rounded"
+              className="px-5 py-2 text-sm tracking-wide border border-rose-400/40 text-rose-300 hover:bg-rose-400/20 hover:border-rose-400/60 transition-all duration-300 rounded fade-in-up"
               style={{ fontWeight: 400 }}
             >
               Sign In
@@ -53,7 +79,7 @@ export default async function HomePage() {
           <div className="max-w-3xl mx-auto text-center">
             {/* Tagline */}
             <p
-              className="text-xs tracking-[0.3em] uppercase text-cyan-400/80 mb-6"
+              className="text-xs tracking-[0.3em] uppercase text-cyan-400/80 mb-6 fade-in-up fade-in-up-delay-1"
               style={{ fontWeight: 500 }}
             >
               Tournament Tracking for Riftbound
@@ -61,7 +87,7 @@ export default async function HomePage() {
 
             {/* Main Headline */}
             <h1
-              className="text-5xl md:text-7xl mb-6 leading-tight"
+              className="text-5xl md:text-7xl mb-6 leading-tight fade-in-up fade-in-up-delay-2"
               style={{ fontWeight: 200, letterSpacing: '-0.02em' }}
             >
               <span className="text-white">Track every</span>
@@ -76,7 +102,7 @@ export default async function HomePage() {
 
             {/* Description */}
             <p
-              className="text-lg md:text-xl text-white/70 mb-10 max-w-xl mx-auto leading-relaxed"
+              className="text-lg md:text-xl text-white/70 mb-10 max-w-xl mx-auto leading-relaxed fade-in-up fade-in-up-delay-3"
               style={{ fontWeight: 300 }}
             >
               Track every round from Swiss to Top Cut.
@@ -85,19 +111,21 @@ export default async function HomePage() {
             </p>
 
             {/* CTA */}
-            <Link
-              href="/login"
-              className="btn-cta inline-block px-10 py-4 text-sm tracking-wide rounded-lg text-white transition-all duration-300"
-              style={{ fontWeight: 500 }}
-            >
-              Get Started
-            </Link>
+            <div className="fade-in-up fade-in-up-delay-4">
+              <Link
+                href="/login"
+                className="btn-cta inline-block px-10 py-4 text-sm tracking-wide rounded-lg text-white transition-all duration-300"
+                style={{ fontWeight: 500 }}
+              >
+                Get Started
+              </Link>
+            </div>
 
             {/* Features */}
-            <div className="mt-20 grid md:grid-cols-3 gap-8">
+            <div className="mt-20 grid md:grid-cols-3 gap-8 fade-in-up fade-in-up-delay-5">
               <div
-                className="p-6 rounded-xl border border-white/10 hover:border-rose-400/30 transition-colors duration-300"
-                style={{ background: 'rgba(255, 255, 255, 0.03)' }}
+                className="p-6 rounded-xl border border-white/10 hover:border-rose-400/30 transition-all duration-500 hover:transform hover:-translate-y-1"
+                style={{ background: 'rgba(255, 255, 255, 0.03)', backdropFilter: 'blur(4px)' }}
               >
                 <p
                   className="text-rose-400 text-xs tracking-[0.2em] uppercase mb-3"
@@ -120,8 +148,8 @@ export default async function HomePage() {
               </div>
 
               <div
-                className="p-6 rounded-xl border border-white/10 hover:border-cyan-400/30 transition-colors duration-300"
-                style={{ background: 'rgba(255, 255, 255, 0.03)' }}
+                className="p-6 rounded-xl border border-white/10 hover:border-cyan-400/30 transition-all duration-500 hover:transform hover:-translate-y-1"
+                style={{ background: 'rgba(255, 255, 255, 0.03)', backdropFilter: 'blur(4px)' }}
               >
                 <p
                   className="text-cyan-400 text-xs tracking-[0.2em] uppercase mb-3"
@@ -144,8 +172,8 @@ export default async function HomePage() {
               </div>
 
               <div
-                className="p-6 rounded-xl border border-white/10 hover:border-fuchsia-400/30 transition-colors duration-300"
-                style={{ background: 'rgba(255, 255, 255, 0.03)' }}
+                className="p-6 rounded-xl border border-white/10 hover:border-fuchsia-400/30 transition-all duration-500 hover:transform hover:-translate-y-1"
+                style={{ background: 'rgba(255, 255, 255, 0.03)', backdropFilter: 'blur(4px)' }}
               >
                 <p
                   className="text-fuchsia-400 text-xs tracking-[0.2em] uppercase mb-3"
