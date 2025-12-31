@@ -23,7 +23,8 @@ export default async function LoginPage() {
       <div
         className="min-h-screen flex flex-col"
         style={{
-          background: 'linear-gradient(180deg, rgba(10, 10, 14, 0.92) 0%, rgba(10, 10, 14, 0.98) 100%)',
+          background: 'linear-gradient(135deg, rgba(15, 10, 20, 0.75) 0%, rgba(20, 15, 25, 0.65) 50%, rgba(15, 20, 25, 0.75) 100%)',
+          backdropFilter: 'blur(2px)',
         }}
       >
         {/* Header */}
@@ -31,7 +32,7 @@ export default async function LoginPage() {
           <nav className="max-w-6xl mx-auto">
             <Link
               href="/"
-              className="text-sm tracking-wide text-white/50 hover:text-white transition-colors duration-300"
+              className="text-sm tracking-wide text-white/50 hover:text-rose-300 transition-colors duration-300"
               style={{ fontWeight: 300 }}
             >
               &larr; Back
@@ -41,18 +42,22 @@ export default async function LoginPage() {
 
         {/* Login Form */}
         <main className="flex-1 flex items-center justify-center px-8">
-          <div className="w-full max-w-sm text-center">
+          <div
+            className="w-full max-w-sm text-center p-8 rounded-2xl border border-white/10"
+            style={{ background: 'rgba(15, 10, 20, 0.6)', backdropFilter: 'blur(12px)' }}
+          >
             {/* Logo */}
             <span
-              className="text-3xl tracking-tight text-white mb-4 block"
+              className="text-3xl tracking-tight mb-3 block"
               style={{ fontWeight: 300 }}
             >
-              Rift<span style={{ fontWeight: 500 }}>Record</span>
+              <span className="text-rose-400">Rift</span>
+              <span className="text-white" style={{ fontWeight: 500 }}>Record</span>
             </span>
 
             {/* Tagline */}
             <p
-              className="text-white/40 text-sm mb-12"
+              className="text-white/50 text-sm mb-10"
               style={{ fontWeight: 300 }}
             >
               Sign in to track your tournaments
@@ -67,8 +72,8 @@ export default async function LoginPage() {
             >
               <button
                 type="submit"
-                className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white text-neutral-800 text-sm tracking-wide hover:bg-neutral-100 transition-colors duration-300"
-                style={{ fontWeight: 400 }}
+                className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white text-neutral-800 text-sm tracking-wide hover:bg-white/90 transition-colors duration-300 rounded-lg"
+                style={{ fontWeight: 500 }}
               >
                 <GoogleIcon />
                 Continue with Google
@@ -77,7 +82,7 @@ export default async function LoginPage() {
 
             {/* Divider */}
             <div className="flex items-center gap-4 my-8">
-              <div className="flex-1 h-px bg-white/10" />
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
             </div>
 
             {/* Terms */}

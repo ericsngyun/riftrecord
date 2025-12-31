@@ -20,25 +20,28 @@ export default async function HomePage() {
         backgroundRepeat: 'no-repeat',
       }}
     >
+      {/* Lighter overlay to show more background */}
       <div
         className="min-h-screen flex flex-col"
         style={{
-          background: 'linear-gradient(180deg, rgba(10, 10, 14, 0.92) 0%, rgba(10, 10, 14, 0.98) 100%)',
+          background: 'linear-gradient(135deg, rgba(15, 10, 20, 0.75) 0%, rgba(20, 15, 25, 0.65) 50%, rgba(15, 20, 25, 0.75) 100%)',
+          backdropFilter: 'blur(2px)',
         }}
       >
         {/* Header */}
         <header className="px-8 py-6">
           <nav className="max-w-6xl mx-auto flex items-center justify-between">
             <span
-              className="text-2xl tracking-tight text-white"
+              className="text-2xl tracking-tight"
               style={{ fontWeight: 300 }}
             >
-              Rift<span style={{ fontWeight: 500 }}>Record</span>
+              <span className="text-rose-400">Rift</span>
+              <span className="text-white" style={{ fontWeight: 500 }}>Record</span>
             </span>
             <Link
               href="/login"
-              className="text-sm tracking-wide text-white/70 hover:text-white transition-colors duration-300"
-              style={{ fontWeight: 300 }}
+              className="px-5 py-2 text-sm tracking-wide border border-rose-400/40 text-rose-300 hover:bg-rose-400/20 hover:border-rose-400/60 transition-all duration-300 rounded"
+              style={{ fontWeight: 400 }}
             >
               Sign In
             </Link>
@@ -50,46 +53,55 @@ export default async function HomePage() {
           <div className="max-w-3xl mx-auto text-center">
             {/* Tagline */}
             <p
-              className="text-xs tracking-[0.3em] uppercase text-white/40 mb-8"
-              style={{ fontWeight: 400 }}
+              className="text-xs tracking-[0.3em] uppercase text-cyan-400/80 mb-6"
+              style={{ fontWeight: 500 }}
             >
               Tournament Tracking for Riftbound
             </p>
 
             {/* Main Headline */}
             <h1
-              className="text-5xl md:text-7xl text-white mb-8 leading-tight"
+              className="text-5xl md:text-7xl mb-6 leading-tight"
               style={{ fontWeight: 200, letterSpacing: '-0.02em' }}
             >
-              Your matches.
+              <span className="text-white">Your matches.</span>
               <br />
-              <span className="text-white/60">Your story.</span>
+              <span
+                className="bg-gradient-to-r from-rose-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent"
+                style={{ fontWeight: 300 }}
+              >
+                Your story.
+              </span>
             </h1>
 
             {/* Description */}
             <p
-              className="text-lg md:text-xl text-white/50 mb-12 max-w-xl mx-auto leading-relaxed"
+              className="text-lg md:text-xl text-white/70 mb-10 max-w-xl mx-auto leading-relaxed"
               style={{ fontWeight: 300 }}
             >
               Track every round from Swiss to Top Cut.
+              <br className="hidden md:block" />
               Analyze your performance. Share your results.
             </p>
 
             {/* CTA */}
             <Link
               href="/login"
-              className="inline-block px-10 py-4 text-sm tracking-wide border border-white/20 text-white hover:bg-white hover:text-black transition-all duration-300"
-              style={{ fontWeight: 400 }}
+              className="inline-block px-10 py-4 text-sm tracking-wide rounded bg-gradient-to-r from-rose-500/90 to-fuchsia-500/90 text-white hover:from-rose-500 hover:to-fuchsia-500 hover:shadow-lg hover:shadow-rose-500/25 transition-all duration-300"
+              style={{ fontWeight: 500 }}
             >
               Get Started
             </Link>
 
-            {/* Features - Minimal text only */}
-            <div className="mt-24 grid md:grid-cols-3 gap-12 md:gap-8">
-              <div className="group">
+            {/* Features */}
+            <div className="mt-20 grid md:grid-cols-3 gap-8">
+              <div
+                className="p-6 rounded-xl border border-white/10 hover:border-rose-400/30 transition-colors duration-300"
+                style={{ background: 'rgba(255, 255, 255, 0.03)' }}
+              >
                 <p
-                  className="text-white/30 text-xs tracking-[0.2em] uppercase mb-3"
-                  style={{ fontWeight: 400 }}
+                  className="text-rose-400 text-xs tracking-[0.2em] uppercase mb-3"
+                  style={{ fontWeight: 500 }}
                 >
                   01
                 </p>
@@ -100,17 +112,20 @@ export default async function HomePage() {
                   Record
                 </h3>
                 <p
-                  className="text-white/40 text-sm leading-relaxed"
+                  className="text-white/50 text-sm leading-relaxed"
                   style={{ fontWeight: 300 }}
                 >
                   Log matches with detailed results and opponent tracking
                 </p>
               </div>
 
-              <div className="group">
+              <div
+                className="p-6 rounded-xl border border-white/10 hover:border-cyan-400/30 transition-colors duration-300"
+                style={{ background: 'rgba(255, 255, 255, 0.03)' }}
+              >
                 <p
-                  className="text-white/30 text-xs tracking-[0.2em] uppercase mb-3"
-                  style={{ fontWeight: 400 }}
+                  className="text-cyan-400 text-xs tracking-[0.2em] uppercase mb-3"
+                  style={{ fontWeight: 500 }}
                 >
                   02
                 </p>
@@ -121,17 +136,20 @@ export default async function HomePage() {
                   Analyze
                 </h3>
                 <p
-                  className="text-white/40 text-sm leading-relaxed"
+                  className="text-white/50 text-sm leading-relaxed"
                   style={{ fontWeight: 300 }}
                 >
                   View win rates, matchup statistics, and performance trends
                 </p>
               </div>
 
-              <div className="group">
+              <div
+                className="p-6 rounded-xl border border-white/10 hover:border-fuchsia-400/30 transition-colors duration-300"
+                style={{ background: 'rgba(255, 255, 255, 0.03)' }}
+              >
                 <p
-                  className="text-white/30 text-xs tracking-[0.2em] uppercase mb-3"
-                  style={{ fontWeight: 400 }}
+                  className="text-fuchsia-400 text-xs tracking-[0.2em] uppercase mb-3"
+                  style={{ fontWeight: 500 }}
                 >
                   03
                 </p>
@@ -142,7 +160,7 @@ export default async function HomePage() {
                   Share
                 </h3>
                 <p
-                  className="text-white/40 text-sm leading-relaxed"
+                  className="text-white/50 text-sm leading-relaxed"
                   style={{ fontWeight: 300 }}
                 >
                   Export tournament summaries as images for social media
@@ -155,7 +173,7 @@ export default async function HomePage() {
         {/* Footer */}
         <footer className="px-8 py-8">
           <p
-            className="text-center text-white/20 text-xs tracking-wide"
+            className="text-center text-white/30 text-xs tracking-wide"
             style={{ fontWeight: 300 }}
           >
             Built for the Riftbound community
