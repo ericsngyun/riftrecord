@@ -29,68 +29,104 @@ export default async function LoginPage() {
       >
         {/* Header */}
         <header className="px-8 py-6">
-          <nav className="max-w-6xl mx-auto">
+          <nav className="max-w-6xl mx-auto flex items-center justify-between">
             <Link
               href="/"
-              className="text-sm tracking-wide text-white/50 hover:text-rose-300 transition-colors duration-300"
+              className="text-sm tracking-wide text-white/40 hover:text-white transition-colors duration-300"
               style={{ fontWeight: 300 }}
             >
               &larr; Back
             </Link>
-          </nav>
-        </header>
-
-        {/* Login Form */}
-        <main className="flex-1 flex items-center justify-center px-8">
-          <div
-            className="w-full max-w-sm text-center p-8 rounded-2xl border border-white/10"
-            style={{ background: 'rgba(15, 10, 20, 0.6)', backdropFilter: 'blur(12px)' }}
-          >
-            {/* Logo */}
             <span
-              className="text-3xl tracking-tight mb-3 block"
+              className="text-xl tracking-tight"
               style={{ fontWeight: 300 }}
             >
               <span className="text-rose-400">Rift</span>
               <span className="text-white" style={{ fontWeight: 500 }}>Record</span>
             </span>
+            <div className="w-12" />
+          </nav>
+        </header>
 
-            {/* Tagline */}
+        {/* Login Form */}
+        <main className="flex-1 flex items-center justify-center px-8">
+          <div className="w-full max-w-md text-center">
+            {/* Headline */}
             <p
-              className="text-white/50 text-sm mb-10"
+              className="text-xs tracking-[0.3em] uppercase text-cyan-400/80 mb-4"
+              style={{ fontWeight: 500 }}
+            >
+              Welcome
+            </p>
+            <h1
+              className="text-4xl md:text-5xl mb-4"
+              style={{ fontWeight: 200, letterSpacing: '-0.02em' }}
+            >
+              <span className="text-white">Sign in to</span>
+              <br />
+              <span
+                className="bg-gradient-to-r from-rose-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent"
+                style={{ fontWeight: 300 }}
+              >
+                continue
+              </span>
+            </h1>
+            <p
+              className="text-white/40 text-sm mb-12"
               style={{ fontWeight: 300 }}
             >
-              Sign in to track your tournaments
+              Track your tournament performance
             </p>
 
-            {/* Google Sign In */}
-            <form
-              action={async () => {
-                'use server';
-                await signIn('google', { redirectTo: '/dashboard' });
-              }}
+            {/* Login Card */}
+            <div
+              className="p-8 rounded-2xl border border-white/10 hover:border-white/20 transition-colors duration-500"
+              style={{ background: 'rgba(15, 10, 20, 0.5)', backdropFilter: 'blur(16px)' }}
             >
-              <button
-                type="submit"
-                className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white text-neutral-800 text-sm tracking-wide hover:bg-white/90 transition-colors duration-300 rounded-lg"
-                style={{ fontWeight: 500 }}
+              {/* Google Sign In */}
+              <form
+                action={async () => {
+                  'use server';
+                  await signIn('google', { redirectTo: '/dashboard' });
+                }}
               >
-                <GoogleIcon />
-                Continue with Google
-              </button>
-            </form>
+                <button
+                  type="submit"
+                  className="btn-oauth group w-full flex items-center justify-center gap-3 px-6 py-4 text-sm tracking-wide rounded-xl transition-all duration-300"
+                  style={{ fontWeight: 500 }}
+                >
+                  <span className="relative flex items-center justify-center w-6 h-6">
+                    <span className="absolute inset-0 bg-white rounded-full opacity-90 group-hover:opacity-100 transition-opacity" />
+                    <GoogleIcon />
+                  </span>
+                  <span>Continue with Google</span>
+                </button>
+              </form>
 
-            {/* Divider */}
-            <div className="flex items-center gap-4 my-8">
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+              {/* Divider */}
+              <div className="flex items-center gap-4 my-8">
+                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-rose-400/20 to-transparent" />
+                <span className="text-white/20 text-xs" style={{ fontWeight: 300 }}>secure login</span>
+                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-cyan-400/20 to-transparent" />
+              </div>
+
+              {/* Info */}
+              <p
+                className="text-white/30 text-xs leading-relaxed"
+                style={{ fontWeight: 300 }}
+              >
+                We only access your basic profile information.
+                <br />
+                Your data stays private.
+              </p>
             </div>
 
             {/* Terms */}
             <p
-              className="text-white/30 text-xs leading-relaxed"
+              className="text-white/20 text-xs mt-8"
               style={{ fontWeight: 300 }}
             >
-              By signing in, you agree to our terms of service and privacy policy.
+              By signing in, you agree to our terms of service.
             </p>
           </div>
         </main>
@@ -101,7 +137,7 @@ export default async function LoginPage() {
 
 function GoogleIcon() {
   return (
-    <svg className="w-5 h-5" viewBox="0 0 24 24">
+    <svg className="w-4 h-4 relative z-10" viewBox="0 0 24 24">
       <path
         fill="#4285F4"
         d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"

@@ -383,3 +383,43 @@ body {
     background-position: 100% 50%;
   }
 }
+
+/* OAuth Button with themed styling */
+.btn-oauth {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: white;
+}
+
+.btn-oauth::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(244, 63, 94, 0) 30%,
+    rgba(244, 63, 94, 0.15) 50%,
+    rgba(217, 70, 239, 0) 70%,
+    transparent 100%
+  );
+  transition: left 0.6s ease;
+}
+
+.btn-oauth:hover::before {
+  left: 100%;
+}
+
+.btn-oauth:hover {
+  background: linear-gradient(135deg, rgba(244, 63, 94, 0.15) 0%, rgba(217, 70, 239, 0.1) 100%);
+  border-color: rgba(244, 63, 94, 0.4);
+  transform: translateY(-1px);
+  box-shadow:
+    0 8px 30px -10px rgba(244, 63, 94, 0.3),
+    0 0 15px rgba(217, 70, 239, 0.15);
+}
