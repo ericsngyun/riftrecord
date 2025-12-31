@@ -1,12 +1,10 @@
 import { auth, signIn } from '@/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Swords, ArrowLeft } from 'lucide-react';
 
 export default async function LoginPage() {
   const session = await auth();
 
-  // If already logged in, redirect to dashboard
   if (session?.user) {
     redirect('/dashboard');
   }
@@ -25,63 +23,70 @@ export default async function LoginPage() {
       <div
         className="min-h-screen flex flex-col"
         style={{
-          background: 'linear-gradient(180deg, rgba(15, 15, 19, 0.85) 0%, rgba(15, 15, 19, 0.95) 100%)',
+          background: 'linear-gradient(180deg, rgba(10, 10, 14, 0.92) 0%, rgba(10, 10, 14, 0.98) 100%)',
         }}
       >
-        {/* Back to Home */}
-        <header className="px-6 py-4">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-foreground-secondary hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Home
-          </Link>
+        {/* Header */}
+        <header className="px-8 py-6">
+          <nav className="max-w-6xl mx-auto">
+            <Link
+              href="/"
+              className="text-sm tracking-wide text-white/50 hover:text-white transition-colors duration-300"
+              style={{ fontWeight: 300 }}
+            >
+              &larr; Back
+            </Link>
+          </nav>
         </header>
 
-        {/* Login Card */}
-        <main className="flex-1 flex items-center justify-center px-6">
-          <div className="w-full max-w-md">
-            <div className="card-glass p-8 animate-fadeIn">
-              {/* Logo */}
-              <div className="flex items-center justify-center gap-2 mb-8">
-                <Swords className="w-10 h-10 text-accent-primary" />
-                <span className="text-2xl font-bold text-foreground">RiftRecord</span>
-              </div>
+        {/* Login Form */}
+        <main className="flex-1 flex items-center justify-center px-8">
+          <div className="w-full max-w-sm text-center">
+            {/* Logo */}
+            <span
+              className="text-3xl tracking-tight text-white mb-4 block"
+              style={{ fontWeight: 300 }}
+            >
+              Rift<span style={{ fontWeight: 500 }}>Record</span>
+            </span>
 
-              {/* Title */}
-              <h1 className="text-2xl font-bold text-foreground text-center mb-2">
-                Welcome Back
-              </h1>
-              <p className="text-foreground-muted text-center mb-8">
-                Sign in to track your tournament matches
-              </p>
+            {/* Tagline */}
+            <p
+              className="text-white/40 text-sm mb-12"
+              style={{ fontWeight: 300 }}
+            >
+              Sign in to track your tournaments
+            </p>
 
-              {/* Google Sign In */}
-              <form
-                action={async () => {
-                  'use server';
-                  await signIn('google', { redirectTo: '/dashboard' });
-                }}
+            {/* Google Sign In */}
+            <form
+              action={async () => {
+                'use server';
+                await signIn('google', { redirectTo: '/dashboard' });
+              }}
+            >
+              <button
+                type="submit"
+                className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white text-neutral-800 text-sm tracking-wide hover:bg-neutral-100 transition-colors duration-300"
+                style={{ fontWeight: 400 }}
               >
-                <button type="submit" className="btn btn-google w-full py-3 text-base">
-                  <GoogleIcon />
-                  Continue with Google
-                </button>
-              </form>
+                <GoogleIcon />
+                Continue with Google
+              </button>
+            </form>
 
-              {/* Divider */}
-              <div className="flex items-center gap-4 my-6">
-                <div className="flex-1 h-px bg-border" />
-                <span className="text-foreground-muted text-sm">or</span>
-                <div className="flex-1 h-px bg-border" />
-              </div>
-
-              {/* Info */}
-              <p className="text-foreground-muted text-sm text-center">
-                By signing in, you agree to our terms of service and privacy policy.
-              </p>
+            {/* Divider */}
+            <div className="flex items-center gap-4 my-8">
+              <div className="flex-1 h-px bg-white/10" />
             </div>
+
+            {/* Terms */}
+            <p
+              className="text-white/30 text-xs leading-relaxed"
+              style={{ fontWeight: 300 }}
+            >
+              By signing in, you agree to our terms of service and privacy policy.
+            </p>
           </div>
         </main>
       </div>
