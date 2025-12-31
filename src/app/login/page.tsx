@@ -1,6 +1,7 @@
 import { auth, signIn } from '@/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { VideoBackground } from '@/components/VideoBackground';
 
 export default async function LoginPage() {
   const session = await auth();
@@ -10,18 +11,12 @@ export default async function LoginPage() {
   }
 
   return (
-    <div
-      className="min-h-screen"
-      style={{
-        backgroundImage: "url('/background.jpg')",
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed',
-        backgroundRepeat: 'no-repeat',
-      }}
-    >
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Video Background with image fallback */}
+      <VideoBackground className="z-0" />
+
       <div
-        className="min-h-screen flex flex-col"
+        className="min-h-screen flex flex-col relative z-10"
         style={{
           background: 'linear-gradient(135deg, rgba(15, 10, 20, 0.75) 0%, rgba(20, 15, 25, 0.65) 50%, rgba(15, 20, 25, 0.75) 100%)',
           backdropFilter: 'blur(2px)',
