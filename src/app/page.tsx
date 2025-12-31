@@ -64,13 +64,13 @@ export default async function HomePage() {
               className="text-5xl md:text-7xl mb-6 leading-tight"
               style={{ fontWeight: 200, letterSpacing: '-0.02em' }}
             >
-              <span className="text-white">Your matches.</span>
+              <span className="text-white">Track every</span>
               <br />
               <span
                 className="bg-gradient-to-r from-rose-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent"
                 style={{ fontWeight: 300 }}
               >
-                Your story.
+                victory.
               </span>
             </h1>
 
@@ -87,7 +87,7 @@ export default async function HomePage() {
             {/* CTA */}
             <Link
               href="/login"
-              className="inline-block px-10 py-4 text-sm tracking-wide rounded bg-gradient-to-r from-rose-500/90 to-fuchsia-500/90 text-white hover:from-rose-500 hover:to-fuchsia-500 hover:shadow-lg hover:shadow-rose-500/25 transition-all duration-300"
+              className="btn-cta inline-block px-10 py-4 text-sm tracking-wide rounded-lg text-white transition-all duration-300"
               style={{ fontWeight: 500 }}
             >
               Get Started
