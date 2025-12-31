@@ -1,11 +1,5 @@
-// Leader represents a Riftbound leader card
-export interface Leader {
-  id: string;
-  name: string;
-  title: string;
-  colors: [string, string]; // Primary and secondary color for gradients
-  imageUrl: string;
-}
+// Re-export Leader types from data file
+export type { Leader, Domain, DomainCode } from '@/data/leaders';
 
 // Tournament format types
 export type TournamentFormat =
@@ -77,7 +71,9 @@ export interface TournamentRound {
   roundNumber: number;
   roundType: RoundType;
   opponentLeaderId: string;
+  opponentName?: string; // Optional opponent player name
   result: MatchResult;
+  diceWon?: boolean; // Did player win the dice roll?
   topcutLevel?: TopcutLevel; // Only set when roundType is 'topcut'
   notes?: string;
 }
