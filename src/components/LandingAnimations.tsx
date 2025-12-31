@@ -221,43 +221,42 @@ export function LandingAnimations() {
   );
 }
 
-// Loading Screen Component
+// Loading Screen Component - Dimensional Portal Effect
 export function LoadingScreen({ onComplete }: { onComplete: () => void }) {
-  const [phase, setPhase] = useState<'loading' | 'complete' | 'exit'>('loading');
+  const [phase, setPhase] = useState<'enter' | 'warp' | 'exit'>('enter');
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    // Animate progress bar
+    // Animate progress
     const progressInterval = setInterval(() => {
       setProgress(prev => {
         if (prev >= 100) {
           clearInterval(progressInterval);
           return 100;
         }
-        // Ease out effect - slower as it approaches 100
-        const increment = Math.max(1, (100 - prev) / 10);
+        const increment = Math.max(0.5, (100 - prev) / 15);
         return Math.min(100, prev + increment);
       });
-    }, 50);
+    }, 40);
 
-    // Complete phase after progress done
-    const completeTimer = setTimeout(() => {
-      setPhase('complete');
-    }, 1800);
+    // Warp phase - speed lines intensify
+    const warpTimer = setTimeout(() => {
+      setPhase('warp');
+    }, 2000);
 
-    // Exit phase
+    // Exit phase - zoom through portal
     const exitTimer = setTimeout(() => {
       setPhase('exit');
-    }, 2400);
+    }, 2600);
 
-    // Call onComplete
+    // Complete
     const finalTimer = setTimeout(() => {
       onComplete();
-    }, 3000);
+    }, 3200);
 
     return () => {
       clearInterval(progressInterval);
-      clearTimeout(completeTimer);
+      clearTimeout(warpTimer);
       clearTimeout(exitTimer);
       clearTimeout(finalTimer);
     };
@@ -270,177 +269,220 @@ export function LoadingScreen({ onComplete }: { onComplete: () => void }) {
         inset: 0,
         zIndex: 100,
         display: 'flex',
-        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        background: '#0a0a0e',
+        background: '#050508',
         opacity: phase === 'exit' ? 0 : 1,
-        transform: phase === 'exit' ? 'scale(1.1)' : 'scale(1)',
-        transition: 'opacity 0.6s ease-out, transform 0.6s ease-out',
+        transition: 'opacity 0.6s ease-out',
         pointerEvents: phase === 'exit' ? 'none' : 'auto',
+        perspective: '1000px',
+        overflow: 'hidden',
       }}
     >
-      {/* Background Glow */}
+      {/* Warp Speed Lines */}
       <div
         style={{
           position: 'absolute',
-          width: '600px',
-          height: '600px',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(244, 63, 94, 0.15) 0%, transparent 70%)',
-          filter: 'blur(80px)',
-          animation: 'pulse-glow 2s ease-in-out infinite',
+          inset: 0,
+          overflow: 'hidden',
         }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          width: '400px',
-          height: '400px',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(6, 182, 212, 0.1) 0%, transparent 70%)',
-          filter: 'blur(60px)',
-          animation: 'pulse-glow 2s ease-in-out infinite 0.5s',
-        }}
-      />
+      >
+        {[...Array(60)].map((_, i) => {
+          const angle = (i / 60) * 360;
+          const distance = 50 + Math.random() * 50;
+          const isAccent = i % 5 === 0;
+          return (
+            <div
+              key={i}
+              style={{
+                position: 'absolute',
+                left: '50%',
+                top: '50%',
+                width: phase === 'warp' ? '300px' : '150px',
+                height: isAccent ? '3px' : '2px',
+                background: `linear-gradient(90deg, transparent, ${
+                  i % 3 === 0 ? 'rgba(244, 63, 94, 0.8)' :
+                  i % 3 === 1 ? 'rgba(6, 182, 212, 0.8)' :
+                  'rgba(217, 70, 239, 0.8)'
+                }, transparent)`,
+                transform: `rotate(${angle}deg) translateX(${distance}px)`,
+                transformOrigin: '0 50%',
+                opacity: phase === 'enter' ? 0.3 : phase === 'warp' ? 0.9 : 0,
+                transition: 'all 0.5s ease-out',
+                animation: `warp-line ${1 + Math.random() * 0.5}s ease-in-out infinite`,
+                animationDelay: `${Math.random() * 0.5}s`,
+              }}
+            />
+          );
+        })}
+      </div>
 
-      {/* Logo */}
+      {/* Portal Rings */}
+      {[...Array(5)].map((_, i) => (
+        <div
+          key={i}
+          style={{
+            position: 'absolute',
+            width: `${150 + i * 80}px`,
+            height: `${150 + i * 80}px`,
+            borderRadius: '50%',
+            border: `1px solid rgba(${i % 2 === 0 ? '244, 63, 94' : '6, 182, 212'}, ${0.4 - i * 0.06})`,
+            animation: `portal-ring ${3 + i * 0.5}s ease-in-out infinite`,
+            animationDelay: `${i * 0.2}s`,
+            transform: phase === 'exit' ? `scale(${3 + i})` : 'scale(1)',
+            opacity: phase === 'exit' ? 0 : 1,
+            transition: 'transform 0.6s ease-in, opacity 0.4s ease-out',
+          }}
+        />
+      ))}
+
+      {/* Center Glass Card */}
       <div
         style={{
           position: 'relative',
-          marginBottom: '48px',
-          opacity: phase === 'complete' ? 1 : 0.9,
-          transform: phase === 'complete' ? 'scale(1.05)' : 'scale(1)',
-          transition: 'all 0.5s ease-out',
+          padding: '48px 64px',
+          borderRadius: '24px',
+          background: 'rgba(255, 255, 255, 0.03)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          boxShadow: `
+            0 0 60px rgba(244, 63, 94, 0.15),
+            0 0 120px rgba(6, 182, 212, 0.1),
+            inset 0 0 60px rgba(255, 255, 255, 0.02)
+          `,
+          transform: phase === 'exit' ? 'scale(2) translateZ(500px)' : 'scale(1) translateZ(0)',
+          opacity: phase === 'exit' ? 0 : 1,
+          transition: 'transform 0.6s ease-in, opacity 0.3s ease-out',
         }}
       >
-        {/* Logo Ring */}
+        {/* Inner Glow */}
         <div
+          style={{
+            position: 'absolute',
+            inset: '-1px',
+            borderRadius: '24px',
+            background: 'linear-gradient(135deg, rgba(244, 63, 94, 0.2), transparent, rgba(6, 182, 212, 0.2))',
+            opacity: 0.5,
+            animation: 'inner-glow 2s ease-in-out infinite',
+          }}
+        />
+
+        {/* Logo */}
+        <div
+          style={{
+            position: 'relative',
+            fontSize: '3.5rem',
+            fontWeight: 200,
+            letterSpacing: '-0.02em',
+            textShadow: '0 0 40px rgba(244, 63, 94, 0.5)',
+          }}
+        >
+          <span style={{ color: '#f43f5e', fontWeight: 300 }}>Rift</span>
+          <span style={{ color: '#ffffff', fontWeight: 500 }}>Record</span>
+        </div>
+
+        {/* Progress Ring */}
+        <svg
           style={{
             position: 'absolute',
             inset: '-20px',
-            borderRadius: '50%',
-            border: '1px solid rgba(244, 63, 94, 0.3)',
-            animation: 'spin-slow 8s linear infinite',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            inset: '-35px',
-            borderRadius: '50%',
-            border: '1px solid rgba(6, 182, 212, 0.2)',
-            animation: 'spin-slow 12s linear infinite reverse',
-          }}
-        />
-
-        {/* Logo Text */}
-        <div
-          style={{
-            fontSize: '3rem',
-            fontWeight: 300,
-            letterSpacing: '-0.02em',
-            animation: 'text-glow 2s ease-in-out infinite',
+            width: 'calc(100% + 40px)',
+            height: 'calc(100% + 40px)',
           }}
         >
-          <span style={{ color: '#f43f5e' }}>Rift</span>
-          <span style={{ color: '#ffffff', fontWeight: 500 }}>Record</span>
-        </div>
-      </div>
-
-      {/* Progress Container */}
-      <div
-        style={{
-          width: '200px',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '16px',
-        }}
-      >
-        {/* Progress Bar */}
-        <div
-          style={{
-            width: '100%',
-            height: '2px',
-            background: 'rgba(255, 255, 255, 0.1)',
-            borderRadius: '1px',
-            overflow: 'hidden',
-          }}
-        >
-          <div
-            style={{
-              width: `${progress}%`,
-              height: '100%',
-              background: 'linear-gradient(90deg, #f43f5e, #d946ef, #06b6d4)',
-              borderRadius: '1px',
-              transition: 'width 0.1s ease-out',
-              boxShadow: '0 0 20px rgba(244, 63, 94, 0.5)',
-            }}
+          <rect
+            x="10"
+            y="10"
+            width="calc(100% - 20px)"
+            height="calc(100% - 20px)"
+            rx="30"
+            ry="30"
+            fill="none"
+            stroke="rgba(255, 255, 255, 0.1)"
+            strokeWidth="1"
           />
-        </div>
-
-        {/* Loading Text */}
-        <div
-          style={{
-            fontSize: '0.75rem',
-            color: 'rgba(255, 255, 255, 0.4)',
-            fontWeight: 300,
-            letterSpacing: '0.2em',
-            textTransform: 'uppercase',
-          }}
-        >
-          {phase === 'complete' ? 'Welcome' : 'Loading'}
-        </div>
+          <rect
+            x="10"
+            y="10"
+            width="calc(100% - 20px)"
+            height="calc(100% - 20px)"
+            rx="30"
+            ry="30"
+            fill="none"
+            stroke="url(#progress-gradient)"
+            strokeWidth="2"
+            strokeDasharray="1000"
+            strokeDashoffset={1000 - (progress * 10)}
+            style={{ transition: 'stroke-dashoffset 0.1s ease-out' }}
+          />
+          <defs>
+            <linearGradient id="progress-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#f43f5e" />
+              <stop offset="50%" stopColor="#d946ef" />
+              <stop offset="100%" stopColor="#06b6d4" />
+            </linearGradient>
+          </defs>
+        </svg>
       </div>
 
-      {/* Animated Particles */}
+      {/* Floating Particles */}
       <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
-        {[...Array(20)].map((_, i) => (
+        {[...Array(30)].map((_, i) => (
           <div
             key={i}
             style={{
               position: 'absolute',
-              width: '2px',
-              height: '2px',
-              background: i % 2 === 0 ? 'rgba(244, 63, 94, 0.6)' : 'rgba(6, 182, 212, 0.6)',
+              width: `${2 + Math.random() * 4}px`,
+              height: `${2 + Math.random() * 4}px`,
+              background: i % 3 === 0 ? '#f43f5e' : i % 3 === 1 ? '#06b6d4' : '#d946ef',
               borderRadius: '50%',
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
-              animation: `float-particle ${3 + Math.random() * 4}s ease-in-out infinite`,
+              opacity: 0.6,
+              animation: `float-to-center ${2 + Math.random() * 2}s ease-in-out infinite`,
               animationDelay: `${Math.random() * 2}s`,
+              boxShadow: `0 0 ${4 + Math.random() * 8}px currentColor`,
             }}
           />
         ))}
       </div>
 
       <style jsx>{`
-        @keyframes pulse-glow {
-          0%, 100% { opacity: 0.5; transform: scale(1); }
-          50% { opacity: 0.8; transform: scale(1.05); }
-        }
-
-        @keyframes spin-slow {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-
-        @keyframes text-glow {
+        @keyframes warp-line {
           0%, 100% {
-            text-shadow: 0 0 20px rgba(244, 63, 94, 0.3), 0 0 40px rgba(244, 63, 94, 0.1);
+            transform: rotate(var(--angle)) translateX(var(--distance)) scaleX(1);
           }
           50% {
-            text-shadow: 0 0 30px rgba(244, 63, 94, 0.5), 0 0 60px rgba(244, 63, 94, 0.2);
+            transform: rotate(var(--angle)) translateX(calc(var(--distance) + 20px)) scaleX(1.5);
           }
         }
 
-        @keyframes float-particle {
+        @keyframes portal-ring {
+          0%, 100% {
+            transform: scale(1) rotateX(75deg);
+            opacity: 0.6;
+          }
+          50% {
+            transform: scale(1.05) rotateX(75deg);
+            opacity: 1;
+          }
+        }
+
+        @keyframes inner-glow {
+          0%, 100% { opacity: 0.3; }
+          50% { opacity: 0.6; }
+        }
+
+        @keyframes float-to-center {
           0%, 100% {
             transform: translate(0, 0) scale(1);
-            opacity: 0.3;
+            opacity: 0.4;
           }
           50% {
-            transform: translate(${Math.random() > 0.5 ? '' : '-'}${20 + Math.random() * 30}px, ${Math.random() > 0.5 ? '' : '-'}${20 + Math.random() * 30}px) scale(1.5);
+            transform: translate(
+              calc((50vw - 50%) * 0.1),
+              calc((50vh - 50%) * 0.1)
+            ) scale(1.2);
             opacity: 0.8;
           }
         }
@@ -484,7 +526,6 @@ export function LandingWrapper({ children }: { children: React.ReactNode }) {
 
   const handleLoadingComplete = () => {
     setIsLoading(false);
-    // Small delay before showing content animations
     setTimeout(() => setShowContent(true), 100);
   };
 
