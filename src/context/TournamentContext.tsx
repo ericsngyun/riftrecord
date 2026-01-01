@@ -27,6 +27,7 @@ interface AddRoundPayload {
   result: MatchResult;
   roundType: RoundType;
   topcutLevel?: TopcutLevel;
+  diceWon?: boolean;
   notes?: string;
 }
 
@@ -100,6 +101,7 @@ function tournamentReducer(state: TournamentState, action: TournamentAction): To
         opponentLeaderId: action.payload.opponentLeaderId,
         result: action.payload.result,
         topcutLevel: action.payload.topcutLevel,
+        diceWon: action.payload.diceWon,
         notes: action.payload.notes,
       };
       return {
@@ -190,6 +192,7 @@ interface TournamentContextValue {
     result: MatchResult,
     roundType: RoundType,
     topcutLevel?: TopcutLevel,
+    diceWon?: boolean,
     notes?: string
   ) => void;
   updateRound: (roundId: string, updates: Partial<TournamentRound>) => void;
@@ -229,11 +232,12 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
     result: MatchResult,
     roundType: RoundType,
     topcutLevel?: TopcutLevel,
+    diceWon?: boolean,
     notes?: string
   ) => {
     dispatch({
       type: 'ADD_ROUND',
-      payload: { opponentLeaderId, result, roundType, topcutLevel, notes },
+      payload: { opponentLeaderId, result, roundType, topcutLevel, diceWon, notes },
     });
   };
 

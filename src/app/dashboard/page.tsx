@@ -4,7 +4,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { useTournament } from '@/context/TournamentContext';
 import { TournamentSetup, MatchTracker, TournamentResults } from '@/components';
-import { Swords, LogOut, User } from 'lucide-react';
+import { LogOut, User } from 'lucide-react';
 import Image from 'next/image';
 
 type AppView = 'setup' | 'tracker' | 'results';
@@ -50,13 +50,16 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-app">
       <div className="bg-app-overlay min-h-screen">
-        {/* Header - Compact */}
+        {/* Header - Matching Landing Page */}
         <header className="sticky top-0 z-50 bg-background-secondary/90 backdrop-blur-sm border-b border-border">
-          <div className="max-w-lg mx-auto px-3 py-2 flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              <Swords className="w-5 h-5 text-accent-primary" />
-              <span className="text-base font-bold text-foreground">RiftRecord</span>
-            </div>
+          <div className="max-w-lg mx-auto px-3 py-2.5 flex items-center justify-between">
+            <span
+              className="text-xl tracking-wide uppercase"
+              style={{ fontFamily: 'var(--font-display)', fontWeight: 700, letterSpacing: '0.05em' }}
+            >
+              <span className="text-rose-400">Rift</span>
+              <span className="text-white">Record</span>
+            </span>
 
             {/* User Menu */}
             <div className="flex items-center gap-2">

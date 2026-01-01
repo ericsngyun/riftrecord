@@ -5,7 +5,7 @@ import { MatchResult, RoundType, TopcutLevel, TOPCUT_LEVEL_OPTIONS } from '@/typ
 import { LeaderSelector } from './LeaderSelector';
 import { ResultSelector } from './ResultSelector';
 import { useTournament } from '@/context/TournamentContext';
-import { Plus, X, MessageSquare, Trophy, Swords } from 'lucide-react';
+import { Plus, X, MessageSquare, Trophy, Swords, Dices } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface RoundEntryProps {
@@ -20,6 +20,7 @@ export function RoundEntry({ swissRoundNumber, topcutRoundNumber, onComplete }: 
   const [topcutLevel, setTopcutLevel] = useState<TopcutLevel | null>(null);
   const [opponentLeaderId, setOpponentLeaderId] = useState<string | null>(null);
   const [result, setResult] = useState<MatchResult | null>(null);
+  const [diceWon, setDiceWon] = useState<boolean | null>(null);
   const [notes, setNotes] = useState('');
   const [showNotes, setShowNotes] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -53,6 +54,7 @@ export function RoundEntry({ swissRoundNumber, topcutRoundNumber, onComplete }: 
       result!,
       roundType,
       roundType === 'topcut' ? topcutLevel! : undefined,
+      diceWon ?? undefined,
       notes.trim() || undefined
     );
 
@@ -60,6 +62,7 @@ export function RoundEntry({ swissRoundNumber, topcutRoundNumber, onComplete }: 
     setOpponentLeaderId(null);
     setResult(null);
     setTopcutLevel(null);
+    setDiceWon(null);
     setNotes('');
     setShowNotes(false);
     setErrors({});
@@ -70,17 +73,18 @@ export function RoundEntry({ swissRoundNumber, topcutRoundNumber, onComplete }: 
     setOpponentLeaderId(null);
     setResult(null);
     setTopcutLevel(null);
+    setDiceWon(null);
     setNotes('');
     setShowNotes(false);
     setErrors({});
   };
 
-  const isFormDirty = opponentLeaderId || result || notes || topcutLevel;
+  const isFormDirty = opponentLeaderId || result || notes || topcutLevel || diceWon !== null;
   const isValid = opponentLeaderId && result && (roundType === 'swiss' || topcutLevel);
 
   return (
     <div className="bg-background-secondary rounded-xl border border-border p-3 space-y-3">
-      {/* Round Type Toggle - Compact Pills */}
+      {/* Round Type Toggle */}
       <div className="flex gap-1.5">
         <button
           type="button"
@@ -113,7 +117,7 @@ export function RoundEntry({ swissRoundNumber, topcutRoundNumber, onComplete }: 
         </button>
       </div>
 
-      {/* Topcut Level - Compact Grid */}
+      {/* Topcut Level */}
       {roundType === 'topcut' && (
         <div className="space-y-1.5">
           <div className="flex flex-wrap gap-1">
@@ -185,7 +189,52 @@ export function RoundEntry({ swissRoundNumber, topcutRoundNumber, onComplete }: 
         )}
       </div>
 
-      {/* Notes - Collapsible */}
+      {/* Dice Roll Toggle */}
+      <div className="space-y-1.5">
+        <span className="text-xs font-medium text-foreground-muted">Dice Roll</span>
+        <div className="flex gap-1.5">
+          <button
+            type="button"
+            onClick={() => setDiceWon(true)}
+            className={cn(
+              'flex-1 py-1.5 px-2 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1.5',
+              diceWon === true
+                ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/50'
+                : 'bg-background-tertiary text-foreground-muted hover:text-foreground'
+            )}
+          >
+            <Dices className="w-3.5 h-3.5" />
+            Won
+          </button>
+          <button
+            type="button"
+            onClick={() => setDiceWon(false)}
+            className={cn(
+              'flex-1 py-1.5 px-2 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1.5',
+              diceWon === false
+                ? 'bg-red-500/20 text-red-400 ring-1 ring-red-500/50'
+                : 'bg-background-tertiary text-foreground-muted hover:text-foreground'
+            )}
+          >
+            <Dices className="w-3.5 h-3.5" />
+            Lost
+          </button>
+          <button
+            type="button"
+            onClick={() => setDiceWon(null)}
+            className={cn(
+              'py-1.5 px-2 rounded-lg text-xs font-medium transition-all',
+              diceWon === null
+                ? 'bg-foreground-muted/20 text-foreground-muted'
+                : 'bg-background-tertiary text-foreground-muted hover:text-foreground'
+            )}
+          >
+            Skip
+          </button>
+        </div>
+      </div>
+
+      {/* Notes */}
       {!showNotes ? (
         <button
           type="button"

@@ -5,7 +5,7 @@ import { TournamentRound, TOPCUT_LEVEL_OPTIONS } from '@/types';
 import { getLeaderById, getLeaderColors } from '@/data/leaders';
 import { cn, isWin } from '@/lib/utils';
 import { BO3Result } from './BO3Result';
-import { Trash2, Trophy } from 'lucide-react';
+import { Trash2, Trophy, Dices } from 'lucide-react';
 
 interface MatchupCardProps {
   round: TournamentRound;
@@ -75,6 +75,21 @@ export function MatchupCard({
           {opponentLeader.displayName}
         </p>
       </div>
+
+      {/* Dice Roll Indicator */}
+      {round.diceWon !== undefined && (
+        <div
+          className={cn(
+            'flex items-center justify-center w-6 h-6 rounded',
+            round.diceWon
+              ? 'bg-emerald-500/20 text-emerald-400'
+              : 'bg-foreground-muted/10 text-foreground-muted/50'
+          )}
+          title={round.diceWon ? 'Won dice roll' : 'Lost dice roll'}
+        >
+          <Dices className="w-3.5 h-3.5" />
+        </div>
+      )}
 
       {/* Result */}
       <BO3Result result={round.result} size="sm" />
