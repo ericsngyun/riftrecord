@@ -11,26 +11,25 @@ interface ResultSelectorProps {
 
 export function ResultSelector({ value, onChange, label }: ResultSelectorProps) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-1.5">
       {label && (
-        <label className="block text-sm font-medium text-foreground-secondary">
+        <label className="block text-xs font-medium text-foreground-muted">
           {label}
         </label>
       )}
-      <div className="flex gap-2">
+      <div className="flex gap-1.5">
         {MATCH_RESULTS.map((result) => (
           <button
             key={result.value}
             type="button"
             onClick={() => onChange(result.value)}
             className={cn(
-              'flex-1 py-2.5 px-3 rounded-lg font-medium text-sm transition-all',
-              'border-2',
+              'flex-1 py-1.5 px-2 rounded-lg font-medium text-xs transition-all',
               value === result.value
                 ? result.isWin
-                  ? 'bg-accent-success/20 border-accent-success text-accent-success'
-                  : 'bg-accent-danger/20 border-accent-danger text-accent-danger'
-                : 'bg-background-tertiary border-border text-foreground-secondary hover:border-border-hover'
+                  ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/50'
+                  : 'bg-red-500/20 text-red-400 ring-1 ring-red-500/50'
+                : 'bg-background-tertiary text-foreground-muted hover:text-foreground'
             )}
             aria-pressed={value === result.value}
           >

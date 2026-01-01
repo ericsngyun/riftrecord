@@ -5,7 +5,7 @@ import { TournamentRound } from '@/types';
 import { MatchupCard } from './MatchupCard';
 import { useTournament } from '@/context/TournamentContext';
 import { calculateFullTournamentStats } from '@/lib/utils';
-import { Trophy, AlertTriangle, Swords } from 'lucide-react';
+import { Trophy, Swords } from 'lucide-react';
 
 interface RoundsListProps {
   rounds: TournamentRound[];
@@ -32,93 +32,68 @@ export function RoundsList({ rounds, playerLeaderId }: RoundsListProps) {
 
   if (rounds.length === 0) {
     return (
-      <div className="card text-center py-12">
-        <Trophy className="w-12 h-12 text-foreground-muted mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-foreground mb-2">No rounds yet</h3>
-        <p className="text-foreground-muted">
-          Add your first round to start tracking your tournament!
-        </p>
+      <div className="text-center py-8 text-foreground-muted">
+        <Trophy className="w-8 h-8 mx-auto mb-2 opacity-50" />
+        <p className="text-sm">No rounds yet</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Overall Stats */}
-      <div className="flex items-center justify-between p-4 bg-background-tertiary rounded-lg border border-border">
-        <div>
-          <p className="text-sm text-foreground-muted">Overall Record</p>
-          <p className="text-2xl font-bold text-foreground">{stats.overall.record}</p>
-        </div>
-        <div className="text-right">
-          <p className="text-sm text-foreground-muted">Win Rate</p>
-          <p className="text-2xl font-bold text-foreground">{stats.overall.winRate}%</p>
+    <div className="space-y-3">
+      {/* Compact Stats Bar */}
+      <div className="flex items-center justify-between px-3 py-2 bg-background-tertiary rounded-lg text-sm">
+        <span className="text-foreground-muted">Record</span>
+        <div className="flex items-center gap-3">
+          <span className="font-semibold text-foreground">{stats.overall.record}</span>
+          <span className="text-foreground-muted">·</span>
+          <span className="text-foreground-muted">{stats.overall.winRate}%</span>
         </div>
       </div>
 
-      {/* Swiss Rounds Section */}
+      {/* Swiss Rounds */}
       {swissRounds.length > 0 && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Swords className="w-5 h-5 text-foreground-muted" />
-              <h3 className="text-lg font-semibold text-foreground">Swiss Rounds</h3>
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between px-1">
+            <div className="flex items-center gap-1.5">
+              <Swords className="w-3.5 h-3.5 text-foreground-muted" />
+              <span className="text-xs font-medium text-foreground-muted">Swiss</span>
             </div>
-            <span className="text-sm text-foreground-muted">
-              {stats.swiss.record} ({stats.swiss.winRate}%)
-            </span>
+            <span className="text-xs text-foreground-muted">{stats.swiss.record}</span>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-1.5">
             {swissRounds.map((round) => (
-              <div key={round.id}>
-                {deleteConfirmId === round.id && (
-                  <div className="flex items-center gap-2 p-2 mb-2 bg-accent-danger/10 border border-accent-danger/30 rounded-lg">
-                    <AlertTriangle className="w-4 h-4 text-accent-danger" />
-                    <span className="text-sm text-accent-danger">
-                      Click delete again to confirm removal
-                    </span>
-                  </div>
-                )}
-                <MatchupCard
-                  round={round}
-                  playerLeaderId={playerLeaderId}
-                  onDelete={() => handleDeleteClick(round.id)}
-                />
-              </div>
+              <MatchupCard
+                key={round.id}
+                round={round}
+                playerLeaderId={playerLeaderId}
+                onDelete={() => handleDeleteClick(round.id)}
+                showDeleteConfirm={deleteConfirmId === round.id}
+              />
             ))}
           </div>
         </div>
       )}
 
-      {/* Top Cut Section */}
+      {/* Top Cut Rounds */}
       {topcutRounds.length > 0 && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Trophy className="w-5 h-5 text-accent-warning" />
-              <h3 className="text-lg font-semibold text-accent-warning">Top Cut</h3>
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between px-1">
+            <div className="flex items-center gap-1.5">
+              <Trophy className="w-3.5 h-3.5 text-accent-warning" />
+              <span className="text-xs font-medium text-accent-warning">Top Cut</span>
             </div>
-            <span className="text-sm text-foreground-muted">
-              {stats.topcut.record} ({stats.topcut.winRate}%)
-            </span>
+            <span className="text-xs text-foreground-muted">{stats.topcut.record}</span>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-1.5">
             {topcutRounds.map((round) => (
-              <div key={round.id}>
-                {deleteConfirmId === round.id && (
-                  <div className="flex items-center gap-2 p-2 mb-2 bg-accent-danger/10 border border-accent-danger/30 rounded-lg">
-                    <AlertTriangle className="w-4 h-4 text-accent-danger" />
-                    <span className="text-sm text-accent-danger">
-                      Click delete again to confirm removal
-                    </span>
-                  </div>
-                )}
-                <MatchupCard
-                  round={round}
-                  playerLeaderId={playerLeaderId}
-                  onDelete={() => handleDeleteClick(round.id)}
-                />
-              </div>
+              <MatchupCard
+                key={round.id}
+                round={round}
+                playerLeaderId={playerLeaderId}
+                onDelete={() => handleDeleteClick(round.id)}
+                showDeleteConfirm={deleteConfirmId === round.id}
+              />
             ))}
           </div>
         </div>

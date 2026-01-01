@@ -18,24 +18,23 @@ export function LeaderCard({
   selected = false,
   onClick,
   size = 'md',
-  showName = true,
 }: LeaderCardProps) {
   const sizeClasses = {
-    sm: 'w-16 h-20',
-    md: 'w-24 h-32',
-    lg: 'w-32 h-44',
+    sm: 'w-10 h-12',
+    md: 'w-14 h-[72px]',
+    lg: 'w-20 h-[104px]',
   };
 
   const borderWidth = {
-    sm: 'p-[2px]',
-    md: 'p-[3px]',
-    lg: 'p-[3px]',
+    sm: 'p-[1.5px]',
+    md: 'p-[2px]',
+    lg: 'p-[2px]',
   };
 
   const innerRadius = {
-    sm: 'rounded-[6px]',
-    md: 'rounded-[9px]',
-    lg: 'rounded-[11px]',
+    sm: 'rounded-[4px]',
+    md: 'rounded-[6px]',
+    lg: 'rounded-[8px]',
   };
 
   const [color1, color2] = getLeaderColors(leader);
@@ -46,12 +45,12 @@ export function LeaderCard({
       type="button"
       onClick={onClick}
       className={cn(
-        'relative rounded-lg overflow-hidden transition-all duration-200',
-        'group',
+        'relative rounded-md overflow-hidden transition-all duration-150',
+        'group flex-shrink-0',
         sizeClasses[size],
         borderWidth[size],
-        onClick && 'cursor-pointer hover:scale-105 hover:shadow-lg',
-        selected && 'ring-2 ring-white ring-offset-2 ring-offset-background',
+        onClick && 'cursor-pointer hover:scale-105 active:scale-100',
+        selected && 'ring-1.5 ring-white ring-offset-1 ring-offset-background',
         !onClick && 'cursor-default'
       )}
       style={{ background: gradientBorder }}
@@ -64,30 +63,21 @@ export function LeaderCard({
         <Image
           src={leader.imageUrl}
           alt={leader.displayName}
-          width={128}
-          height={176}
+          width={80}
+          height={104}
           className="w-full h-full object-cover"
         />
 
         {/* Selected indicator */}
         {selected && (
-          <div className="absolute top-1 right-1 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-lg">
-            <Check className="w-3 h-3 text-black" />
+          <div className="absolute top-0.5 right-0.5 w-3.5 h-3.5 bg-white rounded-full flex items-center justify-center shadow">
+            <Check className="w-2 h-2 text-black" />
           </div>
         )}
 
         {/* Hover overlay */}
         {onClick && (
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
-        )}
-
-        {/* Name label */}
-        {showName && (
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent px-1 py-2">
-            <p className="text-white text-xs font-medium text-center truncate">
-              {leader.displayName}
-            </p>
-          </div>
         )}
       </div>
     </button>

@@ -22,15 +22,15 @@ export function TournamentSetup({ onComplete }: TournamentSetupProps) {
     const newErrors: Record<string, string> = {};
 
     if (!title.trim()) {
-      newErrors.title = 'Event title is required';
+      newErrors.title = 'Required';
     }
 
     if (!format) {
-      newErrors.format = 'Please select a format';
+      newErrors.format = 'Required';
     }
 
     if (!leaderId) {
-      newErrors.leader = 'Please select your leader';
+      newErrors.leader = 'Required';
     }
 
     setErrors(newErrors);
@@ -47,22 +47,22 @@ export function TournamentSetup({ onComplete }: TournamentSetupProps) {
   };
 
   const today = new Date().toLocaleDateString('en-US', {
-    month: 'long',
-    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
   });
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8 animate-fadeIn">
+    <form onSubmit={handleSubmit} className="space-y-4">
       {/* Event Title */}
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         <label
           htmlFor="event-title"
-          className="block text-sm font-medium text-foreground-secondary"
+          className="block text-xs font-medium text-foreground-muted"
         >
           Event Title
         </label>
         <div className="relative">
-          <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground-muted" />
+          <Calendar className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-foreground-muted" />
           <input
             id="event-title"
             type="text"
@@ -71,35 +71,35 @@ export function TournamentSetup({ onComplete }: TournamentSetupProps) {
               setTitle(e.target.value);
               if (errors.title) setErrors({ ...errors, title: '' });
             }}
-            placeholder={`Store Championship - ${today}`}
-            className="input pl-10"
+            placeholder={`Local ${today}`}
+            className="w-full bg-background-tertiary border border-border rounded-lg pl-8 pr-3 py-1.5 text-sm text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-accent-primary"
             aria-describedby={errors.title ? 'title-error' : undefined}
           />
         </div>
         {errors.title && (
-          <p id="title-error" className="text-sm text-accent-danger">
+          <p id="title-error" className="text-xs text-accent-danger">
             {errors.title}
           </p>
         )}
       </div>
 
       {/* Format Selection */}
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         <FormatSelector
           value={format}
           onChange={(f) => {
             setFormat(f);
             if (errors.format) setErrors({ ...errors, format: '' });
           }}
-          label="Tournament Format"
+          label="Format"
         />
         {errors.format && (
-          <p className="text-sm text-accent-danger">{errors.format}</p>
+          <p className="text-xs text-accent-danger">{errors.format}</p>
         )}
       </div>
 
       {/* Leader Selection */}
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         <LeaderSelector
           selectedLeaderId={leaderId}
           onSelect={(id) => {
@@ -107,23 +107,21 @@ export function TournamentSetup({ onComplete }: TournamentSetupProps) {
             if (errors.leader) setErrors({ ...errors, leader: '' });
           }}
           label="Your Leader"
-          size="md"
+          size="sm"
         />
         {errors.leader && (
-          <p className="text-sm text-accent-danger">{errors.leader}</p>
+          <p className="text-xs text-accent-danger">{errors.leader}</p>
         )}
       </div>
 
       {/* Submit Button */}
-      <div className="pt-4">
-        <button
-          type="submit"
-          className="btn btn-primary w-full text-base py-3"
-        >
-          Start Tracking
-          <ArrowRight className="w-5 h-5" />
-        </button>
-      </div>
+      <button
+        type="submit"
+        className="w-full py-2 bg-accent-primary hover:bg-purple-500 text-white rounded-lg text-sm font-medium flex items-center justify-center gap-1.5 transition-colors mt-2"
+      >
+        Start Tracking
+        <ArrowRight className="w-4 h-4" />
+      </button>
     </form>
   );
 }

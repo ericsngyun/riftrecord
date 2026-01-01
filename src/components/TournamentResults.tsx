@@ -61,22 +61,25 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
         backgroundColor: '#0f0f13',
         scale: 2,
         useCORS: true,
+        allowTaint: true,
         logging: false,
       });
 
-      canvas.toBlob(async (blob) => {
-        if (blob) {
-          try {
-            await navigator.clipboard.write([
-              new ClipboardItem({ 'image/png': blob }),
-            ]);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-          } catch {
-            handleExport();
-          }
+      const blob = await new Promise<Blob | null>((resolve) => {
+        canvas.toBlob(resolve, 'image/png');
+      });
+
+      if (blob) {
+        try {
+          await navigator.clipboard.write([
+            new ClipboardItem({ 'image/png': blob }),
+          ]);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        } catch {
+          handleExport();
         }
-      }, 'image/png');
+      }
     } catch (error) {
       console.error('Copy failed:', error);
     } finally {
@@ -85,15 +88,19 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
   };
 
   const tweetText = encodeURIComponent(
-    `${tournament.title}\n\nPlaying ${playerLeader?.name}: ${stats.overall.record} (${stats.overall.winRate}% WR)${topcutRounds.length > 0 ? `\nTop Cut: ${stats.topcut.record}` : ''}\n\n#Riftbound #RiftRecord`
+    `${tournament.title}\n\nPlaying ${playerLeader?.displayName}: ${stats.overall.record} (${stats.overall.winRate}% WR)${topcutRounds.length > 0 ? `\nTop Cut: ${stats.topcut.record}` : ''}\n\n#Riftbound #RiftRecord`
   );
 
   return (
-    <div className="space-y-6 animate-fadeIn">
+    <div className="space-y-4">
       {/* Back Button */}
-      <button type="button" onClick={onBack} className="btn btn-ghost">
-        <ArrowLeft className="w-5 h-5" />
-        Back to Tracker
+      <button
+        type="button"
+        onClick={onBack}
+        className="flex items-center gap-1.5 text-sm text-foreground-muted hover:text-foreground transition-colors"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Back
       </button>
 
       {/* Export Preview Card */}
@@ -102,13 +109,13 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
         className="rounded-xl overflow-hidden"
         style={{
           width: '100%',
-          maxWidth: '600px',
+          maxWidth: '480px',
           aspectRatio: '1200 / 675',
           margin: '0 auto',
         }}
       >
         <div
-          className="w-full h-full p-5 flex flex-col relative"
+          className="w-full h-full p-4 flex flex-col relative"
           style={{
             background: playerLeader
               ? generateLeaderGradient(tournament.playerLeaderId, 135)
@@ -126,49 +133,49 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
           {/* Content */}
           <div className="relative z-10 flex flex-col h-full">
             {/* Header */}
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex items-center gap-3">
+            <div className="flex items-start justify-between mb-2">
+              <div className="flex items-center gap-2">
                 {playerLeader && (
                   <LeaderCard leader={playerLeader} size="sm" showName={false} />
                 )}
                 <div>
-                  <h2 className="text-base md:text-lg font-bold text-white line-clamp-1">
+                  <h2 className="text-sm font-bold text-white line-clamp-1">
                     {tournament.title}
                   </h2>
-                  <p className="text-xs text-white/60">{formatLabel}</p>
+                  <p className="text-[10px] text-white/60">{formatLabel}</p>
                   {playerLeader && (
-                    <p className="text-sm font-medium text-white/80">{playerLeader.name}</p>
+                    <p className="text-xs font-medium text-white/80">{playerLeader.displayName}</p>
                   )}
                 </div>
               </div>
               <div className="text-right">
                 <div className="flex items-center gap-1 text-white/60 justify-end">
-                  <Trophy className="w-3.5 h-3.5" />
-                  <span className="text-[10px]">Record</span>
+                  <Trophy className="w-3 h-3" />
+                  <span className="text-[9px]">Record</span>
                 </div>
-                <p className="text-xl md:text-2xl font-bold text-white">{stats.overall.record}</p>
+                <p className="text-lg font-bold text-white">{stats.overall.record}</p>
               </div>
             </div>
 
             {/* Rounds Container */}
-            <div className="flex-1 overflow-hidden flex flex-col gap-2">
+            <div className="flex-1 overflow-hidden flex flex-col gap-1.5">
               {/* Swiss Rounds */}
               {swissRounds.length > 0 && (
                 <div>
-                  <div className="flex items-center gap-1.5 mb-1.5">
-                    <Swords className="w-3 h-3 text-white/60" />
-                    <span className="text-[10px] font-medium text-white/60">
+                  <div className="flex items-center gap-1 mb-1">
+                    <Swords className="w-2.5 h-2.5 text-white/60" />
+                    <span className="text-[9px] font-medium text-white/60">
                       Swiss: {stats.swiss.record}
                     </span>
                   </div>
-                  <div className="grid grid-cols-4 gap-1.5">
+                  <div className="grid grid-cols-4 gap-1">
                     {swissRounds.slice(0, 8).map((round) => {
                       const opponent = getLeaderById(round.opponentLeaderId);
                       const won = isWin(round.result);
                       return (
                         <div
                           key={round.id}
-                          className="relative rounded overflow-hidden p-1.5"
+                          className="relative rounded overflow-hidden p-1"
                           style={{
                             background: generateMatchupGradient(
                               tournament.playerLeaderId,
@@ -177,12 +184,12 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
                           }}
                         >
                           <div className="absolute inset-0 bg-black/50" />
-                          <div className="relative z-10 flex items-center justify-between gap-1">
-                            <span className="text-[9px] text-white/80 truncate flex-1">
-                              {opponent?.name}
+                          <div className="relative z-10 flex items-center justify-between gap-0.5">
+                            <span className="text-[8px] text-white/80 truncate flex-1">
+                              {opponent?.displayName}
                             </span>
                             <span
-                              className={`text-[9px] font-bold px-1 py-0.5 rounded ${
+                              className={`text-[8px] font-bold px-0.5 rounded ${
                                 won ? 'bg-green-500/40 text-green-300' : 'bg-red-500/40 text-red-300'
                               }`}
                             >
@@ -199,13 +206,13 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
               {/* Top Cut Rounds */}
               {topcutRounds.length > 0 && (
                 <div>
-                  <div className="flex items-center gap-1.5 mb-1.5">
-                    <Trophy className="w-3 h-3 text-amber-400" />
-                    <span className="text-[10px] font-medium text-amber-400">
+                  <div className="flex items-center gap-1 mb-1">
+                    <Trophy className="w-2.5 h-2.5 text-amber-400" />
+                    <span className="text-[9px] font-medium text-amber-400">
                       Top Cut: {stats.topcut.record}
                     </span>
                   </div>
-                  <div className="grid grid-cols-3 gap-1.5">
+                  <div className="grid grid-cols-3 gap-1">
                     {topcutRounds.map((round) => {
                       const opponent = getLeaderById(round.opponentLeaderId);
                       const won = isWin(round.result);
@@ -215,7 +222,7 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
                       return (
                         <div
                           key={round.id}
-                          className="relative rounded overflow-hidden p-1.5 border border-amber-500/30"
+                          className="relative rounded overflow-hidden p-1 border border-amber-500/30"
                           style={{
                             background: generateMatchupGradient(
                               tournament.playerLeaderId,
@@ -225,17 +232,15 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
                         >
                           <div className="absolute inset-0 bg-black/50" />
                           <div className="relative z-10">
-                            <div className="flex items-center gap-1 mb-0.5">
-                              <span className="text-[8px] font-bold text-amber-400">
-                                {topcutInfo?.shortLabel}
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between gap-1">
-                              <span className="text-[9px] text-white/80 truncate flex-1">
-                                {opponent?.name}
+                            <span className="text-[7px] font-bold text-amber-400">
+                              {topcutInfo?.shortLabel}
+                            </span>
+                            <div className="flex items-center justify-between gap-0.5">
+                              <span className="text-[8px] text-white/80 truncate flex-1">
+                                {opponent?.displayName}
                               </span>
                               <span
-                                className={`text-[9px] font-bold px-1 py-0.5 rounded ${
+                                className={`text-[8px] font-bold px-0.5 rounded ${
                                   won ? 'bg-green-500/40 text-green-300' : 'bg-red-500/40 text-red-300'
                                 }`}
                               >
@@ -252,8 +257,8 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
             </div>
 
             {/* Footer */}
-            <div className="mt-auto pt-2 border-t border-white/10">
-              <p className="text-[9px] text-white/40 text-center">
+            <div className="mt-auto pt-1.5 border-t border-white/10">
+              <p className="text-[8px] text-white/40 text-center">
                 Generated with RiftRecord
               </p>
             </div>
@@ -261,23 +266,23 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
         </div>
       </div>
 
-      {/* Export Actions */}
-      <div className="flex flex-col sm:flex-row gap-3 max-w-[600px] mx-auto">
+      {/* Export Actions - Compact */}
+      <div className="flex gap-2 max-w-[480px] mx-auto">
         <button
           type="button"
           onClick={handleCopyToClipboard}
           disabled={isExporting}
-          className="btn btn-primary flex-1"
+          className="flex-1 py-2 bg-accent-primary hover:bg-purple-500 text-white rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
         >
           {copied ? (
             <>
-              <Check className="w-5 h-5" />
+              <Check className="w-3.5 h-3.5" />
               Copied!
             </>
           ) : (
             <>
-              <Copy className="w-5 h-5" />
-              Copy Image
+              <Copy className="w-3.5 h-3.5" />
+              Copy
             </>
           )}
         </button>
@@ -286,9 +291,9 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
           type="button"
           onClick={handleExport}
           disabled={isExporting}
-          className="btn btn-secondary flex-1"
+          className="flex-1 py-2 bg-background-tertiary hover:bg-background-secondary text-foreground rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
         >
-          <Download className="w-5 h-5" />
+          <Download className="w-3.5 h-3.5" />
           Download
         </button>
 
@@ -296,40 +301,40 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
           href={`https://twitter.com/intent/tweet?text=${tweetText}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="btn btn-secondary flex-1"
+          className="flex-1 py-2 bg-background-tertiary hover:bg-background-secondary text-foreground rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
         >
-          <Twitter className="w-5 h-5" />
-          Share on X
+          <Twitter className="w-3.5 h-3.5" />
+          Share
         </a>
       </div>
 
-      {/* Full Results List */}
-      <div className="card max-w-[600px] mx-auto">
-        <h3 className="text-lg font-semibold text-foreground mb-4">Full Results</h3>
+      {/* Full Results List - Compact */}
+      <div className="bg-background-secondary rounded-xl border border-border p-3 max-w-[480px] mx-auto">
+        <h3 className="text-sm font-semibold text-foreground mb-3">Full Results</h3>
 
         {/* Swiss Results */}
         {swissRounds.length > 0 && (
-          <div className="mb-6">
-            <div className="flex items-center gap-2 mb-3">
-              <Swords className="w-4 h-4 text-foreground-muted" />
-              <span className="text-sm font-medium text-foreground-secondary">
-                Swiss Rounds ({stats.swiss.record})
+          <div className="mb-3">
+            <div className="flex items-center gap-1.5 mb-2">
+              <Swords className="w-3 h-3 text-foreground-muted" />
+              <span className="text-xs font-medium text-foreground-muted">
+                Swiss ({stats.swiss.record})
               </span>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1">
               {swissRounds.map((round) => {
                 const opponent = getLeaderById(round.opponentLeaderId);
                 const won = isWin(round.result);
                 return (
                   <div
                     key={round.id}
-                    className="flex items-center justify-between p-3 bg-background-tertiary rounded-lg"
+                    className="flex items-center justify-between py-1.5 px-2 bg-background-tertiary rounded"
                   >
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm text-foreground-muted w-8">R{round.roundNumber}</span>
-                      <span className="text-sm font-medium text-foreground">vs {opponent?.name}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-foreground-muted w-6">R{round.roundNumber}</span>
+                      <span className="text-xs font-medium text-foreground">{opponent?.displayName}</span>
                     </div>
-                    <span className={`text-sm font-bold ${won ? 'text-accent-success' : 'text-accent-danger'}`}>
+                    <span className={`text-xs font-bold ${won ? 'text-emerald-400' : 'text-red-400'}`}>
                       {won ? 'W' : 'L'} {round.result}
                     </span>
                   </div>
@@ -341,14 +346,14 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
 
         {/* Topcut Results */}
         {topcutRounds.length > 0 && (
-          <div className="mb-6">
-            <div className="flex items-center gap-2 mb-3">
-              <Trophy className="w-4 h-4 text-accent-warning" />
-              <span className="text-sm font-medium text-accent-warning">
+          <div className="mb-3">
+            <div className="flex items-center gap-1.5 mb-2">
+              <Trophy className="w-3 h-3 text-accent-warning" />
+              <span className="text-xs font-medium text-accent-warning">
                 Top Cut ({stats.topcut.record})
               </span>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1">
               {topcutRounds.map((round) => {
                 const opponent = getLeaderById(round.opponentLeaderId);
                 const won = isWin(round.result);
@@ -358,15 +363,15 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
                 return (
                   <div
                     key={round.id}
-                    className="flex items-center justify-between p-3 bg-background-tertiary rounded-lg border border-accent-warning/20"
+                    className="flex items-center justify-between py-1.5 px-2 bg-background-tertiary rounded border-l-2 border-accent-warning/50"
                   >
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm font-medium text-accent-warning w-12">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-medium text-accent-warning w-8">
                         {topcutInfo?.shortLabel}
                       </span>
-                      <span className="text-sm font-medium text-foreground">vs {opponent?.name}</span>
+                      <span className="text-xs font-medium text-foreground">{opponent?.displayName}</span>
                     </div>
-                    <span className={`text-sm font-bold ${won ? 'text-accent-success' : 'text-accent-danger'}`}>
+                    <span className={`text-xs font-bold ${won ? 'text-emerald-400' : 'text-red-400'}`}>
                       {won ? 'W' : 'L'} {round.result}
                     </span>
                   </div>
@@ -376,20 +381,20 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
           </div>
         )}
 
-        {/* Stats Summary */}
-        <div className="pt-4 border-t border-border">
-          <div className="grid grid-cols-3 gap-4 text-center">
+        {/* Stats Summary - Compact */}
+        <div className="pt-2 border-t border-border">
+          <div className="flex items-center justify-center gap-6 text-center">
             <div>
-              <p className="text-2xl font-bold text-accent-success">{stats.overall.wins}</p>
-              <p className="text-sm text-foreground-muted">Wins</p>
+              <p className="text-lg font-bold text-emerald-400">{stats.overall.wins}</p>
+              <p className="text-[10px] text-foreground-muted">Wins</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-accent-danger">{stats.overall.losses}</p>
-              <p className="text-sm text-foreground-muted">Losses</p>
+              <p className="text-lg font-bold text-red-400">{stats.overall.losses}</p>
+              <p className="text-[10px] text-foreground-muted">Losses</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">{stats.overall.winRate}%</p>
-              <p className="text-sm text-foreground-muted">Win Rate</p>
+              <p className="text-lg font-bold text-foreground">{stats.overall.winRate}%</p>
+              <p className="text-[10px] text-foreground-muted">WR</p>
             </div>
           </div>
         </div>

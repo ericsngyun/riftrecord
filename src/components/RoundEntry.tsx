@@ -30,15 +30,15 @@ export function RoundEntry({ swissRoundNumber, topcutRoundNumber, onComplete }: 
     const newErrors: Record<string, string> = {};
 
     if (!opponentLeaderId) {
-      newErrors.opponent = 'Please select opponent\'s leader';
+      newErrors.opponent = 'Select opponent';
     }
 
     if (!result) {
-      newErrors.result = 'Please select the result';
+      newErrors.result = 'Select result';
     }
 
     if (roundType === 'topcut' && !topcutLevel) {
-      newErrors.topcutLevel = 'Please select the topcut stage';
+      newErrors.topcutLevel = 'Select stage';
     }
 
     setErrors(newErrors);
@@ -76,11 +76,12 @@ export function RoundEntry({ swissRoundNumber, topcutRoundNumber, onComplete }: 
   };
 
   const isFormDirty = opponentLeaderId || result || notes || topcutLevel;
+  const isValid = opponentLeaderId && result && (roundType === 'swiss' || topcutLevel);
 
   return (
-    <div className="card space-y-6 animate-fadeIn">
-      {/* Round Type Toggle */}
-      <div className="flex gap-2">
+    <div className="bg-background-secondary rounded-xl border border-border p-3 space-y-3">
+      {/* Round Type Toggle - Compact Pills */}
+      <div className="flex gap-1.5">
         <button
           type="button"
           onClick={() => {
@@ -88,58 +89,34 @@ export function RoundEntry({ swissRoundNumber, topcutRoundNumber, onComplete }: 
             setTopcutLevel(null);
           }}
           className={cn(
-            'flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all border-2 flex items-center justify-center gap-2',
+            'flex-1 py-1.5 px-3 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1.5',
             roundType === 'swiss'
-              ? 'bg-background-tertiary border-accent-primary text-foreground'
-              : 'bg-transparent border-border text-foreground-secondary hover:border-border-hover'
+              ? 'bg-accent-primary/20 text-accent-primary border border-accent-primary/50'
+              : 'bg-background-tertiary text-foreground-muted hover:text-foreground border border-transparent'
           )}
         >
-          <Swords className="w-4 h-4" />
-          Swiss Round
+          <Swords className="w-3.5 h-3.5" />
+          Swiss {currentRoundNumber > 1 && roundType === 'swiss' && `R${currentRoundNumber}`}
         </button>
         <button
           type="button"
           onClick={() => setRoundType('topcut')}
           className={cn(
-            'flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all border-2 flex items-center justify-center gap-2',
+            'flex-1 py-1.5 px-3 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1.5',
             roundType === 'topcut'
-              ? 'bg-accent-warning/20 border-accent-warning text-accent-warning'
-              : 'bg-transparent border-border text-foreground-secondary hover:border-border-hover'
+              ? 'bg-accent-warning/20 text-accent-warning border border-accent-warning/50'
+              : 'bg-background-tertiary text-foreground-muted hover:text-foreground border border-transparent'
           )}
         >
-          <Trophy className="w-4 h-4" />
+          <Trophy className="w-3.5 h-3.5" />
           Top Cut
         </button>
       </div>
 
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-foreground">
-          {roundType === 'swiss' ? (
-            <>Round {currentRoundNumber}</>
-          ) : (
-            <span className="text-accent-warning">Top Cut Game {currentRoundNumber}</span>
-          )}
-        </h3>
-        {isFormDirty && (
-          <button
-            type="button"
-            onClick={handleCancel}
-            className="btn btn-ghost text-sm py-1.5 px-2"
-          >
-            <X className="w-4 h-4" />
-            Clear
-          </button>
-        )}
-      </div>
-
-      {/* Topcut Level Selection */}
+      {/* Topcut Level - Compact Grid */}
       {roundType === 'topcut' && (
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-foreground-secondary">
-            Top Cut Stage
-          </label>
-          <div className="grid grid-cols-3 gap-2">
+        <div className="space-y-1.5">
+          <div className="flex flex-wrap gap-1">
             {TOPCUT_LEVEL_OPTIONS.map((level) => (
               <button
                 key={level.value}
@@ -149,10 +126,10 @@ export function RoundEntry({ swissRoundNumber, topcutRoundNumber, onComplete }: 
                   if (errors.topcutLevel) setErrors({ ...errors, topcutLevel: '' });
                 }}
                 className={cn(
-                  'py-2 px-3 rounded-lg text-sm font-medium transition-all border',
+                  'py-1 px-2.5 rounded text-xs font-medium transition-all',
                   topcutLevel === level.value
-                    ? 'bg-accent-warning/20 border-accent-warning text-accent-warning'
-                    : 'bg-background-tertiary border-border text-foreground-secondary hover:border-border-hover'
+                    ? 'bg-accent-warning text-black'
+                    : 'bg-background-tertiary text-foreground-muted hover:text-foreground'
                 )}
               >
                 {level.shortLabel}
@@ -160,85 +137,90 @@ export function RoundEntry({ swissRoundNumber, topcutRoundNumber, onComplete }: 
             ))}
           </div>
           {errors.topcutLevel && (
-            <p className="text-sm text-accent-danger">{errors.topcutLevel}</p>
+            <p className="text-xs text-accent-danger">{errors.topcutLevel}</p>
           )}
         </div>
       )}
 
-      {/* Opponent Leader Selection */}
-      <div className="space-y-2">
+      {/* Opponent Selection */}
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-medium text-foreground-muted">Opponent</span>
+          {isFormDirty && (
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="text-xs text-foreground-muted hover:text-foreground flex items-center gap-1"
+            >
+              <X className="w-3 h-3" />
+              Clear
+            </button>
+          )}
+        </div>
         <LeaderSelector
           selectedLeaderId={opponentLeaderId}
           onSelect={(id) => {
             setOpponentLeaderId(id || null);
             if (errors.opponent) setErrors({ ...errors, opponent: '' });
           }}
-          label="Opponent's Leader"
           size="sm"
         />
         {errors.opponent && (
-          <p className="text-sm text-accent-danger">{errors.opponent}</p>
+          <p className="text-xs text-accent-danger">{errors.opponent}</p>
         )}
       </div>
 
       {/* Result Selection */}
-      <div className="space-y-2">
+      <div className="space-y-1.5">
+        <span className="text-xs font-medium text-foreground-muted">Result</span>
         <ResultSelector
           value={result}
           onChange={(r) => {
             setResult(r);
             if (errors.result) setErrors({ ...errors, result: '' });
           }}
-          label="Match Result"
         />
         {errors.result && (
-          <p className="text-sm text-accent-danger">{errors.result}</p>
+          <p className="text-xs text-accent-danger">{errors.result}</p>
         )}
       </div>
 
-      {/* Notes Toggle & Input */}
-      <div className="space-y-2">
-        {!showNotes ? (
-          <button
-            type="button"
-            onClick={() => setShowNotes(true)}
-            className="btn btn-ghost text-sm"
-          >
-            <MessageSquare className="w-4 h-4" />
-            Add notes
-          </button>
-        ) : (
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-foreground-secondary">
-              Notes (optional)
-            </label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Game notes, key plays, etc..."
-              rows={2}
-              className="input resize-none"
-            />
-          </div>
-        )}
-      </div>
+      {/* Notes - Collapsible */}
+      {!showNotes ? (
+        <button
+          type="button"
+          onClick={() => setShowNotes(true)}
+          className="text-xs text-foreground-muted hover:text-foreground flex items-center gap-1"
+        >
+          <MessageSquare className="w-3 h-3" />
+          Add notes
+        </button>
+      ) : (
+        <textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder="Notes..."
+          rows={2}
+          className="w-full bg-background-tertiary border border-border rounded-lg px-2.5 py-1.5 text-sm text-foreground placeholder:text-foreground-muted resize-none focus:outline-none focus:border-accent-primary"
+        />
+      )}
 
-      {/* Submit Button */}
+      {/* Submit */}
       <button
         type="button"
         onClick={handleSubmit}
+        disabled={!isValid}
         className={cn(
-          'btn w-full',
-          opponentLeaderId && result && (roundType === 'swiss' || topcutLevel)
+          'w-full py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-1.5',
+          isValid
             ? roundType === 'topcut'
-              ? 'bg-accent-warning hover:bg-amber-600 text-white'
-              : 'btn-primary'
-            : 'btn-secondary'
+              ? 'bg-accent-warning text-black hover:bg-amber-400'
+              : 'bg-accent-primary text-white hover:bg-purple-500'
+            : 'bg-background-tertiary text-foreground-muted cursor-not-allowed'
         )}
-        disabled={!opponentLeaderId || !result || (roundType === 'topcut' && !topcutLevel)}
       >
-        <Plus className="w-5 h-5" />
-        {roundType === 'swiss' ? `Add Round ${currentRoundNumber}` : `Add ${topcutLevel ? TOPCUT_LEVEL_OPTIONS.find(l => l.value === topcutLevel)?.label : 'Top Cut'} Game`}
+        <Plus className="w-4 h-4" />
+        Add {roundType === 'swiss' ? `Round ${currentRoundNumber}` : topcutLevel ? TOPCUT_LEVEL_OPTIONS.find(l => l.value === topcutLevel)?.shortLabel : 'Game'}
       </button>
     </div>
   );

@@ -16,7 +16,6 @@ export default function DashboardPage() {
   const [manualView, setManualView] = useState<AppView | null>(null);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
-  // Compute the current view based on state and manual overrides
   const view = useMemo((): AppView => {
     if (manualView) return manualView;
     if (isLoading) return 'setup';
@@ -42,7 +41,7 @@ export default function DashboardPage() {
     return (
       <div className="min-h-screen bg-app">
         <div className="bg-app-overlay min-h-screen flex items-center justify-center">
-          <div className="animate-pulse text-foreground-muted">Loading...</div>
+          <div className="animate-pulse text-foreground-muted text-sm">Loading...</div>
         </div>
       </div>
     );
@@ -51,32 +50,32 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-app">
       <div className="bg-app-overlay min-h-screen">
-        {/* Header */}
-        <header className="sticky top-0 z-50 bg-background-secondary/80 backdrop-blur-sm border-b border-border">
-          <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Swords className="w-6 h-6 text-accent-primary" />
-              <span className="text-lg font-bold text-foreground">RiftRecord</span>
+        {/* Header - Compact */}
+        <header className="sticky top-0 z-50 bg-background-secondary/90 backdrop-blur-sm border-b border-border">
+          <div className="max-w-lg mx-auto px-3 py-2 flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <Swords className="w-5 h-5 text-accent-primary" />
+              <span className="text-base font-bold text-foreground">RiftRecord</span>
             </div>
 
             {/* User Menu */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               {session?.user?.image ? (
                 <Image
                   src={session.user.image}
                   alt={session.user.name || 'User'}
-                  width={32}
-                  height={32}
+                  width={28}
+                  height={28}
                   className="rounded-full"
                 />
               ) : (
-                <div className="w-8 h-8 rounded-full bg-background-tertiary flex items-center justify-center">
-                  <User className="w-4 h-4 text-foreground-muted" />
+                <div className="w-7 h-7 rounded-full bg-background-tertiary flex items-center justify-center">
+                  <User className="w-3.5 h-3.5 text-foreground-muted" />
                 </div>
               )}
               <button
                 onClick={() => signOut({ callbackUrl: '/' })}
-                className="btn btn-ghost text-sm py-1.5 px-2"
+                className="p-1.5 rounded-lg text-foreground-muted hover:text-foreground hover:bg-background-tertiary transition-colors"
                 title="Sign out"
               >
                 <LogOut className="w-4 h-4" />
@@ -85,29 +84,29 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        {/* Main Content */}
-        <main className="py-8 px-4">
-          <div className="max-w-2xl mx-auto">
+        {/* Main Content - Tighter Padding */}
+        <main className="py-4 px-3">
+          <div className="max-w-lg mx-auto">
             {/* Reset Confirmation Banner */}
             {showResetConfirm && view === 'tracker' && (
-              <div className="mb-4 p-3 bg-accent-warning/10 border border-accent-warning/30 rounded-lg flex items-center justify-between animate-fadeIn">
-                <span className="text-sm text-accent-warning">
+              <div className="mb-3 p-2.5 bg-accent-warning/10 border border-accent-warning/30 rounded-lg flex items-center justify-between">
+                <span className="text-xs text-accent-warning">
                   Click again to start a new tournament
                 </span>
                 <button
                   type="button"
                   onClick={handleReset}
-                  className="btn btn-danger text-sm py-1.5 px-3"
+                  className="text-xs font-medium text-white bg-accent-danger hover:bg-red-600 px-2.5 py-1 rounded transition-colors"
                 >
-                  Confirm Reset
+                  Confirm
                 </button>
               </div>
             )}
 
             {/* View Content */}
             {view === 'setup' && (
-              <div className="card">
-                <h2 className="text-xl font-semibold text-foreground mb-6">
+              <div className="bg-background-secondary rounded-xl border border-border p-4">
+                <h2 className="text-lg font-semibold text-foreground mb-4">
                   New Tournament
                 </h2>
                 <TournamentSetup onComplete={() => setView('tracker')} />

@@ -6,7 +6,7 @@ import { TOURNAMENT_FORMATS } from '@/types';
 import { getLeaderById, getLeaderColors } from '@/data/leaders';
 import { RoundEntry } from './RoundEntry';
 import { RoundsList } from './RoundsList';
-import { generateLeaderGradient, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
 import { Settings, Share2 } from 'lucide-react';
 
 interface MatchTrackerProps {
@@ -23,71 +23,67 @@ export function MatchTracker({ onViewResults, onReset }: MatchTrackerProps) {
   const playerLeader = getLeaderById(tournament.playerLeaderId);
   const formatLabel = TOURNAMENT_FORMATS[tournament.format];
 
-  // Calculate next round numbers for swiss and topcut
+  // Calculate next round numbers
   const swissRounds = tournament.rounds.filter((r) => r.roundType === 'swiss');
   const topcutRounds = tournament.rounds.filter((r) => r.roundType === 'topcut');
   const nextSwissRound = swissRounds.length + 1;
   const nextTopcutRound = topcutRounds.length + 1;
 
-  // Get leader colors for gradient border
+  // Get leader colors for gradient
   const [color1, color2] = playerLeader
     ? getLeaderColors(playerLeader)
     : ['#6b7280', '#9ca3af'];
   const gradientBorder = `linear-gradient(135deg, ${color1}, ${color2})`;
 
   return (
-    <div className="space-y-6 animate-fadeIn">
-      {/* Tournament Header */}
-      <div className="bg-background-secondary rounded-xl overflow-hidden border border-border">
-        <div className="p-5">
-          {/* Top Row: Title, Date, Settings */}
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <h1 className="text-xl font-bold text-white mb-1">
-                {tournament.title}
-              </h1>
-              <div className="flex items-center gap-2 text-sm text-white/50">
-                <span>{formatLabel}</span>
-                <span className="text-white/30">·</span>
-                <span>{formatDate(tournament.createdAt)}</span>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={onReset}
-              className="btn btn-ghost text-white/50 hover:text-white hover:bg-white/10 p-2"
-              aria-label="Tournament settings"
-            >
-              <Settings className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Player Leader */}
+    <div className="space-y-3">
+      {/* Tournament Header - Compact */}
+      <div className="bg-background-secondary rounded-xl border border-border p-3">
+        <div className="flex items-center gap-3">
+          {/* Leader Image */}
           {playerLeader && (
-            <div className="flex items-center gap-4">
-              {/* Leader image with gradient border */}
-              <div
-                className="relative w-14 h-[72px] rounded-xl p-[3px] flex-shrink-0"
-                style={{ background: gradientBorder }}
-              >
-                <div className="w-full h-full rounded-[9px] overflow-hidden bg-black">
-                  <Image
-                    src={playerLeader.imageUrl}
-                    alt={playerLeader.displayName}
-                    width={56}
-                    height={72}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </div>
-              <div>
-                <p className="text-xs text-white/50 uppercase tracking-wider">Playing as</p>
-                <p className="text-lg font-semibold text-white">
-                  {playerLeader.displayName}
-                </p>
+            <div
+              className="relative w-12 h-[60px] rounded-lg p-[2px] flex-shrink-0"
+              style={{ background: gradientBorder }}
+            >
+              <div className="w-full h-full rounded-[7px] overflow-hidden bg-black">
+                <Image
+                  src={playerLeader.imageUrl}
+                  alt={playerLeader.displayName}
+                  width={48}
+                  height={60}
+                  className="w-full h-full object-cover"
+                />
               </div>
             </div>
           )}
+
+          {/* Tournament Info */}
+          <div className="flex-1 min-w-0">
+            <h1 className="text-base font-bold text-white truncate">
+              {tournament.title}
+            </h1>
+            <div className="flex items-center gap-1.5 text-xs text-white/50">
+              <span>{formatLabel}</span>
+              <span className="text-white/30">·</span>
+              <span>{formatDate(tournament.createdAt)}</span>
+            </div>
+            {playerLeader && (
+              <p className="text-sm text-white/70 mt-0.5">
+                {playerLeader.displayName}
+              </p>
+            )}
+          </div>
+
+          {/* Settings Button */}
+          <button
+            type="button"
+            onClick={onReset}
+            className="p-2 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-colors"
+            aria-label="Tournament settings"
+          >
+            <Settings className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
@@ -105,13 +101,13 @@ export function MatchTracker({ onViewResults, onReset }: MatchTrackerProps) {
 
       {/* View Results Button */}
       {tournament.rounds.length > 0 && (
-        <div className="sticky bottom-4 pt-4">
+        <div className="sticky bottom-3 pt-2">
           <button
             type="button"
             onClick={onViewResults}
-            className="btn btn-primary w-full py-4 text-base animate-pulse-glow"
+            className="w-full py-2.5 bg-accent-primary hover:bg-purple-500 text-white rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-colors shadow-lg"
           >
-            <Share2 className="w-5 h-5" />
+            <Share2 className="w-4 h-4" />
             View & Share Results
           </button>
         </div>
