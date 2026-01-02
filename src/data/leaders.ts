@@ -19,6 +19,7 @@ export interface Leader {
   id: string;
   name: string;
   displayName: string;
+  title: string;
   domains: [DomainCode, DomainCode];
   imageUrl: string;
 }
@@ -40,6 +41,7 @@ export const LEADERS: Leader[] = [
     id: 'ahri',
     name: 'ahri',
     displayName: 'Ahri',
+    title: 'Nine-Tailed Fox',
     domains: ['g', 'b'],
     imageUrl: '/leaders/ahri-gb.png',
   },
@@ -47,6 +49,7 @@ export const LEADERS: Leader[] = [
     id: 'darius',
     name: 'darius',
     displayName: 'Darius',
+    title: 'Hand of Noxus',
     domains: ['r', 'y'],
     imageUrl: '/leaders/darius-ry.png',
   },
@@ -54,6 +57,7 @@ export const LEADERS: Leader[] = [
     id: 'jinx',
     name: 'jinx',
     displayName: 'Jinx',
+    title: 'Loose Cannon',
     domains: ['r', 'p'],
     imageUrl: '/leaders/jinx-rp.png',
   },
@@ -61,6 +65,7 @@ export const LEADERS: Leader[] = [
     id: 'kaisa',
     name: 'kaisa',
     displayName: "Kai'Sa",
+    title: 'Daughter of the Void',
     domains: ['r', 'b'],
     imageUrl: '/leaders/kaisa-rb.png',
   },
@@ -68,6 +73,7 @@ export const LEADERS: Leader[] = [
     id: 'leesin',
     name: 'leesin',
     displayName: 'Lee Sin',
+    title: 'Blind Monk',
     domains: ['g', 'o'],
     imageUrl: '/leaders/leesin-go.png',
   },
@@ -75,6 +81,7 @@ export const LEADERS: Leader[] = [
     id: 'leona',
     name: 'leona',
     displayName: 'Leona',
+    title: 'Radiant Dawn',
     domains: ['g', 'y'],
     imageUrl: '/leaders/leona-gy.png',
   },
@@ -82,6 +89,7 @@ export const LEADERS: Leader[] = [
     id: 'missfortune',
     name: 'missfortune',
     displayName: 'Miss Fortune',
+    title: 'Bounty Hunter',
     domains: ['o', 'p'],
     imageUrl: '/leaders/missfortune-op.png',
   },
@@ -89,6 +97,7 @@ export const LEADERS: Leader[] = [
     id: 'sett',
     name: 'sett',
     displayName: 'Sett',
+    title: 'The Boss',
     domains: ['o', 'y'],
     imageUrl: '/leaders/sett-oy.png',
   },
@@ -96,6 +105,7 @@ export const LEADERS: Leader[] = [
     id: 'teemo',
     name: 'teemo',
     displayName: 'Teemo',
+    title: 'Swift Scout',
     domains: ['b', 'p'],
     imageUrl: '/leaders/teemo-bp.png',
   },
@@ -103,6 +113,7 @@ export const LEADERS: Leader[] = [
     id: 'viktor',
     name: 'viktor',
     displayName: 'Viktor',
+    title: 'Herald of the Arcane',
     domains: ['b', 'y'],
     imageUrl: '/leaders/viktor-by.png',
   },
@@ -110,6 +121,7 @@ export const LEADERS: Leader[] = [
     id: 'volibear',
     name: 'volibear',
     displayName: 'Volibear',
+    title: 'Relentless Storm',
     domains: ['r', 'o'],
     imageUrl: '/leaders/volibear-ro.png',
   },
@@ -117,6 +129,7 @@ export const LEADERS: Leader[] = [
     id: 'yasuo',
     name: 'yasuo',
     displayName: 'Yasuo',
+    title: 'Unforgiven',
     domains: ['g', 'p'],
     imageUrl: '/leaders/yasuo-gp.png',
   },
@@ -125,6 +138,7 @@ export const LEADERS: Leader[] = [
     id: 'azir',
     name: 'azir',
     displayName: 'Azir',
+    title: 'Emperor of the Sands',
     domains: ['g', 'y'],
     imageUrl: '/leaders/azir-gy.png',
   },
@@ -132,6 +146,7 @@ export const LEADERS: Leader[] = [
     id: 'draven',
     name: 'draven',
     displayName: 'Draven',
+    title: 'Glorious Executioner',
     domains: ['r', 'p'],
     imageUrl: '/leaders/draven-rp.png',
   },
@@ -139,6 +154,7 @@ export const LEADERS: Leader[] = [
     id: 'ezreal',
     name: 'ezreal',
     displayName: 'Ezreal',
+    title: 'Prodigal Explorer',
     domains: ['b', 'p'],
     imageUrl: '/leaders/ezreal-bp.png',
   },
@@ -146,6 +162,7 @@ export const LEADERS: Leader[] = [
     id: 'fiora',
     name: 'fiora',
     displayName: 'Fiora',
+    title: 'Grand Duelist',
     domains: ['o', 'y'],
     imageUrl: '/leaders/fiora-oy.png',
   },
@@ -153,6 +170,7 @@ export const LEADERS: Leader[] = [
     id: 'irelia',
     name: 'irelia',
     displayName: 'Irelia',
+    title: 'Blade Dancer',
     domains: ['g', 'p'],
     imageUrl: '/leaders/irelia-gp.png',
   },
@@ -160,6 +178,7 @@ export const LEADERS: Leader[] = [
     id: 'jax',
     name: 'jax',
     displayName: 'Jax',
+    title: 'Grandmaster at Arms',
     domains: ['g', 'o'],
     imageUrl: '/leaders/jax-go.png',
   },
@@ -167,6 +186,7 @@ export const LEADERS: Leader[] = [
     id: 'lucian',
     name: 'lucian',
     displayName: 'Lucian',
+    title: 'Purifier',
     domains: ['r', 'o'],
     imageUrl: '/leaders/lucian-ro.png',
   },
@@ -174,6 +194,7 @@ export const LEADERS: Leader[] = [
     id: 'ornn',
     name: 'ornn',
     displayName: 'Ornn',
+    title: 'Fire Below the Mountain',
     domains: ['g', 'b'],
     imageUrl: '/leaders/ornn-gb.png',
   },
@@ -181,6 +202,7 @@ export const LEADERS: Leader[] = [
     id: 'reksai',
     name: 'reksai',
     displayName: "Rek'Sai",
+    title: 'Void Burrower',
     domains: ['r', 'y'],
     imageUrl: '/leaders/reksai-ry.png',
   },
@@ -188,6 +210,7 @@ export const LEADERS: Leader[] = [
     id: 'renata',
     name: 'renata',
     displayName: 'Renata Glasc',
+    title: 'Chem-Baroness',
     domains: ['b', 'y'],
     imageUrl: '/leaders/renata-by.png',
   },
@@ -195,6 +218,7 @@ export const LEADERS: Leader[] = [
     id: 'rumble',
     name: 'rumble',
     displayName: 'Rumble',
+    title: 'Mechanized Menace',
     domains: ['r', 'b'],
     imageUrl: '/leaders/rumble-rb.png',
   },
@@ -202,6 +226,7 @@ export const LEADERS: Leader[] = [
     id: 'sivir',
     name: 'sivir',
     displayName: 'Sivir',
+    title: 'Battle Mistress',
     domains: ['o', 'p'],
     imageUrl: '/leaders/sivir-op.png',
   },
@@ -230,12 +255,13 @@ export function getLeaderDomainNames(leader: Leader): [string, string] {
   return [DOMAINS[leader.domains[0]].name, DOMAINS[leader.domains[1]].name];
 }
 
-// Search leaders by partial name
+// Search leaders by partial name or title
 export function searchLeaders(query: string): Leader[] {
   const normalized = query.toLowerCase();
   return LEADERS.filter(
     (leader) =>
       leader.displayName.toLowerCase().includes(normalized) ||
-      leader.name.includes(normalized)
+      leader.name.includes(normalized) ||
+      leader.title.toLowerCase().includes(normalized)
   );
 }
