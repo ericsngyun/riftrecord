@@ -87,16 +87,16 @@ export function MatchTracker({ onViewResults, onReset }: MatchTrackerProps) {
         </div>
       </div>
 
-      {/* Round Entry */}
-      <RoundEntry
-        swissRoundNumber={nextSwissRound}
-        topcutRoundNumber={nextTopcutRound}
-      />
-
       {/* Rounds List */}
       <RoundsList
         rounds={tournament.rounds}
         playerLeaderId={tournament.playerLeaderId}
+      />
+
+      {/* Round Entry */}
+      <RoundEntry
+        swissRoundNumber={nextSwissRound}
+        topcutRoundNumber={nextTopcutRound}
       />
 
       {/* View Results Button */}
