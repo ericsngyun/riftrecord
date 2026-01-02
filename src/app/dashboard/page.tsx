@@ -52,7 +52,7 @@ export default function DashboardPage() {
       <div className="bg-app-overlay min-h-screen">
         {/* Header - Matching Landing Page */}
         <header className="sticky top-0 z-50 bg-background-secondary/90 backdrop-blur-sm border-b border-border">
-          <div className="max-w-lg mx-auto px-3 py-2.5 flex items-center justify-between">
+          <div className="max-w-lg md:max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-auto px-3 md:px-6 py-2.5 flex items-center justify-between">
             <span
               className="text-xl tracking-wide uppercase"
               style={{ fontFamily: 'var(--font-display)', fontWeight: 700, letterSpacing: '0.05em' }}
@@ -67,14 +67,20 @@ export default function DashboardPage() {
                 <Image
                   src={session.user.image}
                   alt={session.user.name || 'User'}
-                  width={28}
-                  height={28}
-                  className="rounded-full"
+                  width={32}
+                  height={32}
+                  className="rounded-full ring-2 ring-rose-400/20"
+                  unoptimized
                 />
               ) : (
-                <div className="w-7 h-7 rounded-full bg-background-tertiary flex items-center justify-center">
-                  <User className="w-3.5 h-3.5 text-foreground-muted" />
+                <div className="w-8 h-8 rounded-full bg-background-tertiary flex items-center justify-center ring-2 ring-rose-400/20">
+                  <User className="w-4 h-4 text-foreground-muted" />
                 </div>
+              )}
+              {session?.user?.name && (
+                <span className="text-sm text-foreground font-medium hidden sm:inline-block">
+                  {session.user.name}
+                </span>
               )}
               <button
                 onClick={() => signOut({ callbackUrl: '/' })}
@@ -88,8 +94,8 @@ export default function DashboardPage() {
         </header>
 
         {/* Main Content - Tighter Padding */}
-        <main className="py-4 px-3">
-          <div className="max-w-lg mx-auto">
+        <main className="py-4 md:py-6 px-3 md:px-6">
+          <div className="max-w-lg md:max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-auto">
             {/* Reset Confirmation Banner */}
             {showResetConfirm && view === 'tracker' && (
               <div className="mb-3 p-2.5 bg-accent-warning/10 border border-accent-warning/30 rounded-lg flex items-center justify-between">
