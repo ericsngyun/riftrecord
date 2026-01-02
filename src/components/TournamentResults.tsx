@@ -38,10 +38,11 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
       const html2canvas = (await import('html2canvas')).default;
       const canvas = await html2canvas(exportRef.current, {
         backgroundColor: '#0a0a0f',
-        scale: 2,
+        scale: 3,
         useCORS: true,
         allowTaint: true,
         logging: false,
+        imageTimeout: 0,
         onclone: (clonedDoc) => {
           const clonedEl = clonedDoc.querySelector('[data-export]');
           if (clonedEl) {
@@ -50,7 +51,7 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
         },
       });
 
-      const dataUrl = canvas.toDataURL('image/png');
+      const dataUrl = canvas.toDataURL('image/png', 1.0);
       const link = document.createElement('a');
       link.download = `riftrecord-${tournament.title.replace(/\s+/g, '-').toLowerCase()}.png`;
       link.href = dataUrl;
@@ -59,6 +60,7 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
       document.body.removeChild(link);
     } catch (error) {
       console.error('Export failed:', error);
+      alert('Failed to export image. Please try again.');
     } finally {
       setIsExporting(false);
     }
@@ -72,10 +74,11 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
       const html2canvas = (await import('html2canvas')).default;
       const canvas = await html2canvas(exportRef.current, {
         backgroundColor: '#0a0a0f',
-        scale: 2,
+        scale: 3,
         useCORS: true,
         allowTaint: true,
         logging: false,
+        imageTimeout: 0,
       });
 
       canvas.toBlob(async (blob) => {
@@ -86,16 +89,20 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
             ]);
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
-          } catch {
+          } catch (clipboardError) {
+            console.error('Clipboard write failed:', clipboardError);
             // Fallback to download
             handleExport();
           }
+        } else {
+          console.error('Failed to create blob');
+          setIsExporting(false);
         }
-        setIsExporting(false);
-      }, 'image/png');
+      }, 'image/png', 1.0);
     } catch (error) {
       console.error('Copy failed:', error);
-      setIsExporting(false);
+      alert('Failed to copy image. Downloading instead...');
+      handleExport();
     }
   };
 
@@ -119,8 +126,7 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
       <div
         ref={exportRef}
         data-export
-        className="rounded-xl overflow-hidden mx-auto"
-        style={{ maxWidth: '400px' }}
+        className="rounded-xl overflow-hidden mx-auto max-w-sm md:max-w-md lg:max-w-lg"
       >
         <div
           className="p-4"
@@ -304,7 +310,7 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
       </div>
 
       {/* Actions */}
-      <div className="flex gap-2 max-w-[400px] mx-auto">
+      <div className="flex gap-2 max-w-sm md:max-w-md lg:max-w-lg mx-auto">
         <button
           type="button"
           onClick={handleCopyToClipboard}
@@ -342,22 +348,26 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
       </div>
 
       {/* Detailed Results */}
-      <div className="bg-background-secondary rounded-xl border border-border overflow-hidden max-w-[400px] mx-auto">
+      <div className="bg-background-secondary rounded-xl border border-border overflow-hidden max-w-sm md:max-w-md lg:max-w-lg mx-auto">
         <div className="px-3 py-2 border-b border-border">
           <h3 className="text-xs font-semibold text-foreground">Match Details</h3>
         </div>
 
         <div className="divide-y divide-border">
           {/* Swiss Rounds */}
-          {swissRounds.map((round) => {
+          {swissRounds.map((round, index) => {
             const opponent = getLeaderById(round.opponentLeaderId);
             const won = isWin(round.result);
             const [oColor1, oColor2] = opponent ? getLeaderColors(opponent) : ['#666', '#888'];
             return (
-              <div key={round.id} className="flex items-center gap-2 px-3 py-2">
-                <span className="text-[10px] text-foreground-muted w-5">R{round.roundNumber}</span>
+              <div key={round.id} className="flex items-center gap-3 px-3 py-2.5 hover:bg-background-tertiary/30 transition-colors">
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-background-tertiary flex-shrink-0">
+                  <span className="text-xs font-bold text-foreground">
+                    {index + 1}
+                  </span>
+                </div>
                 <div
-                  className="w-6 h-7 rounded p-[1px] flex-shrink-0"
+                  className="w-7 h-9 rounded p-[1px] flex-shrink-0"
                   style={{ background: `linear-gradient(135deg, ${oColor1}, ${oColor2})` }}
                 >
                   {opponent && (
@@ -365,32 +375,35 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
                       <Image
                         src={opponent.imageUrl}
                         alt={opponent.displayName}
-                        width={24}
-                        height={28}
+                        width={28}
+                        height={36}
                         className="w-full h-full object-cover"
                       />
                     </div>
                   )}
                 </div>
-                <span className="text-xs text-foreground flex-1 truncate">{opponent?.displayName}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{opponent?.displayName}</p>
+                  <p className="text-[10px] text-foreground-muted">Round {round.roundNumber}</p>
+                </div>
                 {round.diceWon !== undefined && (
                   <Dices className={cn(
-                    'w-3.5 h-3.5',
+                    'w-4 h-4',
                     round.diceWon ? 'text-emerald-400' : 'text-foreground-muted/30'
                   )} />
                 )}
-                <span className={cn(
-                  'text-xs font-bold',
-                  won ? 'text-emerald-400' : 'text-red-400'
+                <div className={cn(
+                  'px-3 py-1.5 rounded-lg font-bold text-sm min-w-[60px] text-center',
+                  won ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'
                 )}>
-                  {won ? 'W' : 'L'} {round.result}
-                </span>
+                  {round.result}
+                </div>
               </div>
             );
           })}
 
           {/* Top Cut Rounds */}
-          {topcutRounds.map((round) => {
+          {topcutRounds.map((round, index) => {
             const opponent = getLeaderById(round.opponentLeaderId);
             const won = isWin(round.result);
             const [oColor1, oColor2] = opponent ? getLeaderColors(opponent) : ['#666', '#888'];
@@ -398,10 +411,14 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
               ? TOPCUT_LEVEL_OPTIONS.find((t) => t.value === round.topcutLevel)
               : null;
             return (
-              <div key={round.id} className="flex items-center gap-2 px-3 py-2 bg-amber-500/5">
-                <span className="text-[10px] text-amber-400 w-5">{topcutInfo?.shortLabel}</span>
+              <div key={round.id} className="flex items-center gap-3 px-3 py-2.5 bg-amber-500/5 hover:bg-amber-500/10 transition-colors">
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-amber-500/20 flex-shrink-0">
+                  <span className="text-xs font-bold text-amber-400">
+                    {index + 1}
+                  </span>
+                </div>
                 <div
-                  className="w-6 h-7 rounded p-[1px] flex-shrink-0"
+                  className="w-7 h-9 rounded p-[1px] flex-shrink-0"
                   style={{ background: `linear-gradient(135deg, ${oColor1}, ${oColor2})` }}
                 >
                   {opponent && (
@@ -409,26 +426,29 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
                       <Image
                         src={opponent.imageUrl}
                         alt={opponent.displayName}
-                        width={24}
-                        height={28}
+                        width={28}
+                        height={36}
                         className="w-full h-full object-cover"
                       />
                     </div>
                   )}
                 </div>
-                <span className="text-xs text-foreground flex-1 truncate">{opponent?.displayName}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{opponent?.displayName}</p>
+                  <p className="text-[10px] text-amber-400">{topcutInfo?.label}</p>
+                </div>
                 {round.diceWon !== undefined && (
                   <Dices className={cn(
-                    'w-3.5 h-3.5',
+                    'w-4 h-4',
                     round.diceWon ? 'text-emerald-400' : 'text-foreground-muted/30'
                   )} />
                 )}
-                <span className={cn(
-                  'text-xs font-bold',
-                  won ? 'text-emerald-400' : 'text-red-400'
+                <div className={cn(
+                  'px-3 py-1.5 rounded-lg font-bold text-sm min-w-[60px] text-center',
+                  won ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'
                 )}>
-                  {won ? 'W' : 'L'} {round.result}
-                </span>
+                  {round.result}
+                </div>
               </div>
             );
           })}
