@@ -63,9 +63,12 @@ model Tournament {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  title     String
-  format    String
-  leaderId  String
+  title       String
+  format      String
+  leaderId    String
+  date        DateTime  @default(now())
+  playerCount Int?
+  placing     Int?
 
   rounds    Round[]
 
@@ -80,13 +83,13 @@ model Round {
   tournamentId String
   tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
 
-  roundNumber  Int
-  type         String
-  topcutLevel  String?
-
+  roundNumber    Int
+  type           String
+  topcutLevel    String?
   opponentName   String?
   opponentLeader String?
   result         String?
+  diceWon        Boolean?
   notes          String?  @db.Text
 
   createdAt DateTime @default(now())

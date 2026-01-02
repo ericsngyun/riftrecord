@@ -1,6 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
+import { Flag } from 'lucide-react';
 import type { MatchResult } from '@/types';
 
 interface BO3ResultProps {
@@ -9,7 +10,10 @@ interface BO3ResultProps {
 }
 
 // Parse result into individual game wins
-function parseResult(result: MatchResult): { player: number; opponent: number; games: ('win' | 'loss')[] } {
+function parseResult(result: MatchResult): { player: number; opponent: number; games: ('win' | 'loss')[]; isDraw: boolean } {
+  if (result === 'draw') {
+    return { player: 0, opponent: 0, games: [], isDraw: true };
+  }
   const [player, opponent] = result.split('-').map(Number);
   const games: ('win' | 'loss')[] = [];
 
@@ -17,12 +21,11 @@ function parseResult(result: MatchResult): { player: number; opponent: number; g
   for (let i = 0; i < player; i++) games.push('win');
   for (let i = 0; i < opponent; i++) games.push('loss');
 
-  return { player, opponent, games };
+  return { player, opponent, games, isDraw: false };
 }
 
 export function BO3Result({ result, size = 'md' }: BO3ResultProps) {
-  const { player, opponent, games } = parseResult(result);
-  const isWin = player > opponent;
+  const { player, opponent, games, isDraw } = parseResult(result);
 
   const sizeClasses = {
     sm: 'gap-1',
@@ -35,6 +38,21 @@ export function BO3Result({ result, size = 'md' }: BO3ResultProps) {
     md: 'w-3 h-3',
     lg: 'w-4 h-4',
   };
+
+  const iconSizes = {
+    sm: 'w-3 h-3',
+    md: 'w-4 h-4',
+    lg: 'w-5 h-5',
+  };
+
+  // Draw display
+  if (isDraw) {
+    return (
+      <div className={cn('flex items-center', sizeClasses[size])}>
+        <Flag className={cn(iconSizes[size], 'text-white/70')} />
+      </div>
+    );
+  }
 
   return (
     <div className={cn('flex items-center', sizeClasses[size])}>
@@ -63,9 +81,9 @@ export function BO3Result({ result, size = 'md' }: BO3ResultProps) {
   );
 }
 
-// Alternative display showing W/L text with colored background
+// Alternative display showing W/L/D text with colored background
 export function BO3ResultBadge({ result, size = 'md' }: BO3ResultProps) {
-  const { player, opponent } = parseResult(result);
+  const { player, opponent, isDraw } = parseResult(result);
   const isWin = player > opponent;
 
   const sizeClasses = {
@@ -73,6 +91,21 @@ export function BO3ResultBadge({ result, size = 'md' }: BO3ResultProps) {
     md: 'text-sm px-3 py-1',
     lg: 'text-base px-4 py-1.5',
   };
+
+  if (isDraw) {
+    return (
+      <div
+        className={cn(
+          'font-bold rounded-lg inline-flex items-center gap-1',
+          sizeClasses[size],
+          'bg-white/20 text-white'
+        )}
+      >
+        <Flag className="w-3 h-3" />
+        <span>DRAW</span>
+      </div>
+    );
+  }
 
   return (
     <div

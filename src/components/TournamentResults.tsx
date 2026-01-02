@@ -1,21 +1,26 @@
 'use client';
 
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { useTournament } from '@/context/TournamentContext';
 import { TOURNAMENT_FORMATS, TOPCUT_LEVEL_OPTIONS } from '@/types';
 import { getLeaderById, getLeaderColors } from '@/data/leaders';
-import { calculateFullTournamentStats, isWin } from '@/lib/utils';
-import { ArrowLeft, Swords, Dices, Trophy } from 'lucide-react';
+import { calculateFullTournamentStats, isWin, isDraw } from '@/lib/utils';
+import { ArrowLeft, Swords, Dices, Trophy, Users, Medal, Flag, Save, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface TournamentResultsProps {
   onBack: () => void;
+  onSave?: () => Promise<void>;
 }
 
-export const TournamentResults = memo(function TournamentResults({ onBack }: TournamentResultsProps) {
-  const { state } = useTournament();
+export const TournamentResults = memo(function TournamentResults({ onBack, onSave }: TournamentResultsProps) {
+  const { state, updateTournament } = useTournament();
   const { tournament } = state;
+  const [placingInput, setPlacingInput] = useState<string>('');
+  const [isEditingPlacing, setIsEditingPlacing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   if (!tournament) return null;
 
@@ -27,17 +32,135 @@ export const TournamentResults = memo(function TournamentResults({ onBack }: Tou
 
   const [color1, color2] = playerLeader ? getLeaderColors(playerLeader) : ['#6b7280', '#9ca3af'];
 
+  const handlePlacingSubmit = () => {
+    const placing = parseInt(placingInput, 10);
+    if (placing > 0) {
+      updateTournament({ placing });
+    }
+    setIsEditingPlacing(false);
+    setPlacingInput('');
+  };
+
+  const handleSave = async () => {
+    if (!onSave) return;
+    setIsSaving(true);
+    try {
+      await onSave();
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 2000);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Format placing with ordinal suffix
+  const formatPlacing = (placing: number): string => {
+    if (placing === 1) return '1st';
+    if (placing === 2) return '2nd';
+    if (placing === 3) return '3rd';
+    return `${placing}th`;
+  };
+
   return (
     <div className="space-y-4">
-      {/* Back Button */}
-      <button
-        type="button"
-        onClick={onBack}
-        className="flex items-center gap-1.5 text-sm text-foreground-muted hover:text-foreground transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Back
-      </button>
+      {/* Header with Back and Save */}
+      <div className="flex items-center justify-between">
+        <button
+          type="button"
+          onClick={onBack}
+          className="flex items-center gap-1.5 text-sm text-foreground-muted hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </button>
+        {onSave && (
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={isSaving || saveSuccess}
+            className={cn(
+              'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
+              saveSuccess
+                ? 'bg-emerald-500/20 text-emerald-400'
+                : 'bg-accent-primary hover:bg-purple-500 text-white'
+            )}
+          >
+            {saveSuccess ? (
+              <>
+                <Check className="w-4 h-4" />
+                Saved
+              </>
+            ) : isSaving ? (
+              <>
+                <Save className="w-4 h-4 animate-pulse" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4" />
+                Save Result
+              </>
+            )}
+          </button>
+        )}
+      </div>
+
+      {/* Placing & Player Count Editor */}
+      <div className="flex gap-2">
+        {/* Placing */}
+        <div className="flex-1 bg-background-secondary rounded-lg border border-border p-2.5">
+          <div className="flex items-center gap-2">
+            <Medal className="w-4 h-4 text-amber-400" />
+            <span className="text-xs text-foreground-muted">Placing</span>
+          </div>
+          {isEditingPlacing ? (
+            <div className="flex items-center gap-2 mt-1.5">
+              <input
+                type="number"
+                min="1"
+                value={placingInput}
+                onChange={(e) => setPlacingInput(e.target.value)}
+                placeholder="#"
+                className="w-16 bg-background-tertiary border border-border rounded px-2 py-1 text-sm text-foreground focus:outline-none focus:border-accent-primary"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handlePlacingSubmit();
+                  if (e.key === 'Escape') setIsEditingPlacing(false);
+                }}
+              />
+              <button
+                type="button"
+                onClick={handlePlacingSubmit}
+                className="text-xs text-accent-primary hover:text-purple-400"
+              >
+                Save
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                setPlacingInput(tournament.placing?.toString() || '');
+                setIsEditingPlacing(true);
+              }}
+              className="text-lg font-bold text-white mt-0.5 hover:text-accent-primary transition-colors"
+            >
+              {tournament.placing ? formatPlacing(tournament.placing) : 'Add'}
+            </button>
+          )}
+        </div>
+
+        {/* Player Count */}
+        <div className="flex-1 bg-background-secondary rounded-lg border border-border p-2.5">
+          <div className="flex items-center gap-2">
+            <Users className="w-4 h-4 text-cyan-400" />
+            <span className="text-xs text-foreground-muted">Players</span>
+          </div>
+          <p className="text-lg font-bold text-white mt-0.5">
+            {tournament.playerCount || '—'}
+          </p>
+        </div>
+      </div>
 
       {/* Results Card - Optimized for Screenshots */}
       <div className="rounded-xl overflow-hidden mx-auto w-full max-w-[400px] border-2 border-border shadow-2xl">
@@ -52,9 +175,29 @@ export const TournamentResults = memo(function TournamentResults({ onBack }: Tou
             {/* Summary Info */}
             <div className="mb-3 space-y-1">
               <h2 className="text-lg font-bold text-white">{tournament.title}</h2>
-              <p className="text-xs text-white/70">{formatLabel}</p>
+              <div className="flex items-center gap-2 text-xs text-white/70">
+                <span>{formatLabel}</span>
+                {tournament.playerCount && (
+                  <>
+                    <span className="text-white/30">·</span>
+                    <span className="flex items-center gap-1">
+                      <Users className="w-3 h-3" />
+                      {tournament.playerCount}
+                    </span>
+                  </>
+                )}
+                {tournament.placing && (
+                  <>
+                    <span className="text-white/30">·</span>
+                    <span className="flex items-center gap-1 text-amber-400">
+                      <Medal className="w-3 h-3" />
+                      {formatPlacing(tournament.placing)}
+                    </span>
+                  </>
+                )}
+              </div>
               <p className="text-[10px] text-white/50">
-                {new Date(tournament.createdAt).toLocaleDateString('en-US', {
+                {new Date(tournament.date || tournament.createdAt).toLocaleDateString('en-US', {
                   month: 'short',
                   day: 'numeric',
                   year: 'numeric'
@@ -108,13 +251,18 @@ export const TournamentResults = memo(function TournamentResults({ onBack }: Tou
                   {swissRounds.slice(0, 8).map((round) => {
                     const opponent = getLeaderById(round.opponentLeaderId);
                     const won = isWin(round.result);
+                    const draw = isDraw(round.result);
                     const [oColor1, oColor2] = opponent ? getLeaderColors(opponent) : ['#666', '#888'];
                     return (
                       <div
                         key={round.id}
                         className={cn(
                           'p-1.5 rounded border',
-                          won ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-red-500/30 bg-red-500/5'
+                          draw
+                            ? 'border-white/30 bg-white/5'
+                            : won
+                              ? 'border-emerald-500/30 bg-emerald-500/5'
+                              : 'border-red-500/30 bg-red-500/5'
                         )}
                       >
                         <div className="flex items-center gap-1 mb-1">
@@ -137,12 +285,16 @@ export const TournamentResults = memo(function TournamentResults({ onBack }: Tou
                           </span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className={cn(
-                            'text-[9px] font-bold',
-                            won ? 'text-emerald-400' : 'text-red-400'
-                          )}>
-                            {round.result}
-                          </span>
+                          {draw ? (
+                            <Flag className="w-3 h-3 text-white/70" />
+                          ) : (
+                            <span className={cn(
+                              'text-[9px] font-bold',
+                              won ? 'text-emerald-400' : 'text-red-400'
+                            )}>
+                              {round.result}
+                            </span>
+                          )}
                           {round.diceWon !== undefined && (
                             <Dices className={cn(
                               'w-2.5 h-2.5',
@@ -170,6 +322,7 @@ export const TournamentResults = memo(function TournamentResults({ onBack }: Tou
                   {topcutRounds.map((round) => {
                     const opponent = getLeaderById(round.opponentLeaderId);
                     const won = isWin(round.result);
+                    const draw = isDraw(round.result);
                     const [oColor1, oColor2] = opponent ? getLeaderColors(opponent) : ['#666', '#888'];
                     const topcutInfo = round.topcutLevel
                       ? TOPCUT_LEVEL_OPTIONS.find((t) => t.value === round.topcutLevel)
@@ -179,7 +332,7 @@ export const TournamentResults = memo(function TournamentResults({ onBack }: Tou
                         key={round.id}
                         className={cn(
                           'p-1.5 rounded border border-amber-500/30',
-                          won ? 'bg-emerald-500/5' : 'bg-red-500/5'
+                          draw ? 'bg-white/5' : won ? 'bg-emerald-500/5' : 'bg-red-500/5'
                         )}
                       >
                         <div className="flex items-center gap-1 mb-1">
@@ -207,12 +360,16 @@ export const TournamentResults = memo(function TournamentResults({ onBack }: Tou
                           </span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className={cn(
-                            'text-[9px] font-bold',
-                            won ? 'text-emerald-400' : 'text-red-400'
-                          )}>
-                            {round.result}
-                          </span>
+                          {draw ? (
+                            <Flag className="w-3 h-3 text-white/70" />
+                          ) : (
+                            <span className={cn(
+                              'text-[9px] font-bold',
+                              won ? 'text-emerald-400' : 'text-red-400'
+                            )}>
+                              {round.result}
+                            </span>
+                          )}
                           {round.diceWon !== undefined && (
                             <Dices className={cn(
                               'w-2.5 h-2.5',
@@ -248,6 +405,7 @@ export const TournamentResults = memo(function TournamentResults({ onBack }: Tou
           {swissRounds.map((round, index) => {
             const opponent = getLeaderById(round.opponentLeaderId);
             const won = isWin(round.result);
+            const draw = isDraw(round.result);
             const [oColor1, oColor2] = opponent ? getLeaderColors(opponent) : ['#666', '#888'];
             return (
               <div key={round.id} className="flex items-center gap-3 px-3 py-2.5 hover:bg-background-tertiary/30 transition-colors">
@@ -283,10 +441,21 @@ export const TournamentResults = memo(function TournamentResults({ onBack }: Tou
                   )} />
                 )}
                 <div className={cn(
-                  'px-3 py-1.5 rounded-lg font-bold text-sm min-w-[60px] text-center',
-                  won ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'
+                  'px-3 py-1.5 rounded-lg font-bold text-sm min-w-[60px] text-center flex items-center justify-center gap-1',
+                  draw
+                    ? 'bg-white/10 text-white'
+                    : won
+                      ? 'bg-emerald-500/10 text-emerald-400'
+                      : 'bg-red-500/10 text-red-400'
                 )}>
-                  {round.result}
+                  {draw ? (
+                    <>
+                      <Flag className="w-3 h-3" />
+                      DRAW
+                    </>
+                  ) : (
+                    round.result
+                  )}
                 </div>
               </div>
             );
@@ -296,6 +465,7 @@ export const TournamentResults = memo(function TournamentResults({ onBack }: Tou
           {topcutRounds.map((round, index) => {
             const opponent = getLeaderById(round.opponentLeaderId);
             const won = isWin(round.result);
+            const draw = isDraw(round.result);
             const [oColor1, oColor2] = opponent ? getLeaderColors(opponent) : ['#666', '#888'];
             const topcutInfo = round.topcutLevel
               ? TOPCUT_LEVEL_OPTIONS.find((t) => t.value === round.topcutLevel)
@@ -334,10 +504,21 @@ export const TournamentResults = memo(function TournamentResults({ onBack }: Tou
                   )} />
                 )}
                 <div className={cn(
-                  'px-3 py-1.5 rounded-lg font-bold text-sm min-w-[60px] text-center',
-                  won ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'
+                  'px-3 py-1.5 rounded-lg font-bold text-sm min-w-[60px] text-center flex items-center justify-center gap-1',
+                  draw
+                    ? 'bg-white/10 text-white'
+                    : won
+                      ? 'bg-emerald-500/10 text-emerald-400'
+                      : 'bg-red-500/10 text-red-400'
                 )}>
-                  {round.result}
+                  {draw ? (
+                    <>
+                      <Flag className="w-3 h-3" />
+                      DRAW
+                    </>
+                  ) : (
+                    round.result
+                  )}
                 </div>
               </div>
             );
@@ -356,6 +537,15 @@ export const TournamentResults = memo(function TournamentResults({ onBack }: Tou
               <p className="text-lg font-bold text-red-400">{stats.overall.losses}</p>
               <p className="text-[9px] text-foreground-muted uppercase">Losses</p>
             </div>
+            {stats.overall.draws > 0 && (
+              <>
+                <div className="w-px h-8 bg-border" />
+                <div>
+                  <p className="text-lg font-bold text-white">{stats.overall.draws}</p>
+                  <p className="text-[9px] text-foreground-muted uppercase">Draws</p>
+                </div>
+              </>
+            )}
             <div className="w-px h-8 bg-border" />
             <div>
               <p className="text-lg font-bold text-foreground">{stats.overall.winRate}%</p>

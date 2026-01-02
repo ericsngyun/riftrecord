@@ -97,7 +97,7 @@ export function LeaderSelector({
 
       {/* Leader list - scrollable column */}
       <div
-        className="space-y-2.5 max-h-[280px] overflow-y-auto pr-1 pl-0.5 py-0.5"
+        className="space-y-2.5 max-h-[280px] overflow-y-auto overflow-x-hidden p-1"
         role="listbox"
         aria-label="Available leaders"
       >
@@ -113,7 +113,7 @@ export function LeaderSelector({
               onClick={() => onSelect(leader.id)}
               className={cn(
                 'group relative w-full h-28 rounded-xl overflow-hidden transition-all duration-300',
-                'hover:scale-[1.02] active:scale-[0.99]',
+                'active:scale-[0.98]',
                 isSelected
                   ? 'ring-2 ring-rose-400 shadow-xl shadow-rose-400/20'
                   : 'ring-1 ring-border/50 hover:ring-border hover:shadow-lg'

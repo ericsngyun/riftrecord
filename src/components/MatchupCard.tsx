@@ -4,7 +4,7 @@ import { memo } from 'react';
 import Image from 'next/image';
 import { TournamentRound, TOPCUT_LEVEL_OPTIONS } from '@/types';
 import { getLeaderById, getLeaderColors } from '@/data/leaders';
-import { cn, isWin } from '@/lib/utils';
+import { cn, isWin, isDraw } from '@/lib/utils';
 import { BO3Result } from './BO3Result';
 import { Trash2, Trophy, Dices } from 'lucide-react';
 
@@ -23,6 +23,7 @@ export const MatchupCard = memo(function MatchupCard({
 }: MatchupCardProps) {
   const opponentLeader = getLeaderById(round.opponentLeaderId);
   const won = isWin(round.result);
+  const draw = isDraw(round.result);
   const isTopcut = round.roundType === 'topcut';
   const topcutInfo = isTopcut && round.topcutLevel
     ? TOPCUT_LEVEL_OPTIONS.find((t) => t.value === round.topcutLevel)
@@ -33,17 +34,20 @@ export const MatchupCard = memo(function MatchupCard({
   const [color1, color2] = getLeaderColors(opponentLeader);
   const gradientBorder = `linear-gradient(135deg, ${color1}, ${color2})`;
 
+  // Determine border color based on result
+  const getBorderClass = () => {
+    if (showDeleteConfirm) return 'border-accent-danger/50 bg-accent-danger/5';
+    if (isTopcut) return 'border-amber-500/30';
+    if (draw) return 'border-white/30';
+    if (won) return 'border-emerald-500/20';
+    return 'border-red-500/20';
+  };
+
   return (
     <div
       className={cn(
         'flex items-center gap-2.5 p-2 rounded-lg bg-background-secondary border transition-all',
-        showDeleteConfirm
-          ? 'border-accent-danger/50 bg-accent-danger/5'
-          : isTopcut
-            ? 'border-amber-500/30'
-            : won
-              ? 'border-emerald-500/20'
-              : 'border-red-500/20'
+        getBorderClass()
       )}
     >
       {/* Leader Image */}

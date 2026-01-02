@@ -34,7 +34,7 @@ interface AddRoundPayload {
 // Action types
 type TournamentAction =
   | { type: 'LOAD_TOURNAMENT'; payload: Tournament | null }
-  | { type: 'CREATE_TOURNAMENT'; payload: { title: string; format: TournamentFormat; playerLeaderId: string } }
+  | { type: 'CREATE_TOURNAMENT'; payload: { title: string; format: TournamentFormat; playerLeaderId: string; date?: string; playerCount?: number } }
   | { type: 'UPDATE_TOURNAMENT'; payload: Partial<Tournament> }
   | { type: 'ADD_ROUND'; payload: AddRoundPayload }
   | { type: 'UPDATE_ROUND'; payload: { roundId: string; updates: Partial<TournamentRound> } }
@@ -72,6 +72,8 @@ function tournamentReducer(state: TournamentState, action: TournamentAction): To
         format: action.payload.format,
         playerLeaderId: action.payload.playerLeaderId,
         rounds: [],
+        date: action.payload.date || now,
+        playerCount: action.payload.playerCount,
         createdAt: now,
         updatedAt: now,
       };
@@ -185,7 +187,7 @@ function tournamentReducer(state: TournamentState, action: TournamentAction): To
 // Context
 interface TournamentContextValue {
   state: TournamentState;
-  createTournament: (title: string, format: TournamentFormat, playerLeaderId: string) => void;
+  createTournament: (title: string, format: TournamentFormat, playerLeaderId: string, date?: string, playerCount?: number) => void;
   updateTournament: (updates: Partial<Tournament>) => void;
   addRound: (
     opponentLeaderId: string,
@@ -219,8 +221,8 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
     }
   }, [state.tournament, state.isLoading]);
 
-  const createTournament = useCallback((title: string, format: TournamentFormat, playerLeaderId: string) => {
-    dispatch({ type: 'CREATE_TOURNAMENT', payload: { title, format, playerLeaderId } });
+  const createTournament = useCallback((title: string, format: TournamentFormat, playerLeaderId: string, date?: string, playerCount?: number) => {
+    dispatch({ type: 'CREATE_TOURNAMENT', payload: { title, format, playerLeaderId, date, playerCount } });
   }, []);
 
   const updateTournament = useCallback((updates: Partial<Tournament>) => {

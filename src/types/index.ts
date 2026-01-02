@@ -20,12 +20,13 @@ export const TOURNAMENT_FORMATS: Record<TournamentFormat, string> = {
 };
 
 // Match result represents the outcome of a Best of 3
-export type MatchResult = '2-0' | '2-1' | '1-2' | '0-2';
+export type MatchResult = '2-0' | '2-1' | '1-2' | '0-2' | 'draw';
 
 export interface MatchResultInfo {
   value: MatchResult;
   label: string;
   isWin: boolean;
+  isDraw?: boolean;
 }
 
 export const MATCH_RESULTS: MatchResultInfo[] = [
@@ -33,6 +34,7 @@ export const MATCH_RESULTS: MatchResultInfo[] = [
   { value: '2-1', label: 'W 2-1', isWin: true },
   { value: '1-2', label: 'L 1-2', isWin: false },
   { value: '0-2', label: 'L 0-2', isWin: false },
+  { value: 'draw', label: 'DRAW', isWin: false, isDraw: true },
 ];
 
 // Topcut placement levels
@@ -85,14 +87,19 @@ export interface Tournament {
   format: TournamentFormat;
   playerLeaderId: string;
   rounds: TournamentRound[];
+  date: string; // Tournament date (ISO string)
+  playerCount?: number; // Number of players at tournament
+  placing?: number; // Player's final placing
   createdAt: string;
   updatedAt: string;
+  savedAt?: string; // When tournament was saved to database
 }
 
 // Computed tournament stats
 export interface TournamentStats {
   wins: number;
   losses: number;
+  draws: number;
   record: string;
   winRate: number;
 }

@@ -4,8 +4,9 @@ import { useState } from 'react';
 import { TournamentFormat } from '@/types';
 import { LeaderSelector } from './LeaderSelector';
 import { FormatSelector } from './FormatSelector';
+import { DateSelector } from './DateSelector';
 import { useTournament } from '@/context/TournamentContext';
-import { ArrowRight, Calendar } from 'lucide-react';
+import { ArrowRight, Users } from 'lucide-react';
 
 interface TournamentSetupProps {
   onComplete: () => void;
@@ -16,6 +17,8 @@ export function TournamentSetup({ onComplete }: TournamentSetupProps) {
   const [title, setTitle] = useState('');
   const [format, setFormat] = useState<TournamentFormat | ''>('');
   const [leaderId, setLeaderId] = useState<string | null>(null);
+  const [date, setDate] = useState<string>(new Date().toISOString());
+  const [playerCount, setPlayerCount] = useState<string>('');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const validate = (): boolean => {
@@ -42,7 +45,8 @@ export function TournamentSetup({ onComplete }: TournamentSetupProps) {
 
     if (!validate()) return;
 
-    createTournament(title.trim(), format as TournamentFormat, leaderId!);
+    const count = playerCount ? parseInt(playerCount, 10) : undefined;
+    createTournament(title.trim(), format as TournamentFormat, leaderId!, date, count);
     onComplete();
   };
 
@@ -61,26 +65,56 @@ export function TournamentSetup({ onComplete }: TournamentSetupProps) {
         >
           Event Title
         </label>
-        <div className="relative">
-          <Calendar className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-foreground-muted" />
-          <input
-            id="event-title"
-            type="text"
-            value={title}
-            onChange={(e) => {
-              setTitle(e.target.value);
-              if (errors.title) setErrors({ ...errors, title: '' });
-            }}
-            placeholder={`Local ${today}`}
-            className="w-full bg-background-tertiary border border-border rounded-lg pl-8 pr-3 py-1.5 text-sm text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-accent-primary"
-            aria-describedby={errors.title ? 'title-error' : undefined}
-          />
-        </div>
+        <input
+          id="event-title"
+          type="text"
+          value={title}
+          onChange={(e) => {
+            setTitle(e.target.value);
+            if (errors.title) setErrors({ ...errors, title: '' });
+          }}
+          placeholder={`Local ${today}`}
+          className="w-full bg-background-tertiary border border-border rounded-lg px-3 py-1.5 text-sm text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-accent-primary"
+          aria-describedby={errors.title ? 'title-error' : undefined}
+        />
         {errors.title && (
           <p id="title-error" className="text-xs text-accent-danger">
             {errors.title}
           </p>
         )}
+      </div>
+
+      {/* Date and Player Count Row */}
+      <div className="grid grid-cols-2 gap-3">
+        {/* Date Selection */}
+        <DateSelector
+          value={date}
+          onChange={setDate}
+          label="Date"
+        />
+
+        {/* Player Count */}
+        <div className="space-y-1.5">
+          <label
+            htmlFor="player-count"
+            className="block text-xs font-medium text-foreground-muted"
+          >
+            Players
+          </label>
+          <div className="relative">
+            <Users className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-foreground-muted" />
+            <input
+              id="player-count"
+              type="number"
+              min="2"
+              max="999"
+              value={playerCount}
+              onChange={(e) => setPlayerCount(e.target.value)}
+              placeholder="# of players"
+              className="w-full bg-background-tertiary border border-border rounded-lg pl-8 pr-3 py-1.5 text-sm text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-accent-primary"
+            />
+          </div>
+        </div>
       </div>
 
       {/* Format Selection */}

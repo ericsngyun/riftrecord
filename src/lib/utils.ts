@@ -50,13 +50,22 @@ export function calculateTournamentStats(rounds: TournamentRound[]): TournamentS
     return result?.isWin;
   }).length;
 
-  const losses = rounds.length - wins;
+  const draws = rounds.filter((round) => {
+    const result = MATCH_RESULTS.find((r) => r.value === round.result);
+    return result?.isDraw;
+  }).length;
+
+  const losses = rounds.length - wins - draws;
   const winRate = rounds.length > 0 ? (wins / rounds.length) * 100 : 0;
+
+  // Format record with draws if any
+  const record = draws > 0 ? `${wins}-${losses}-${draws}` : `${wins}-${losses}`;
 
   return {
     wins,
     losses,
-    record: `${wins}-${losses}`,
+    draws,
+    record,
     winRate: Math.round(winRate * 10) / 10,
   };
 }
@@ -105,6 +114,11 @@ export function formatDate(dateString: string): string {
 // Check if a result is a win
 export function isWin(result: string): boolean {
   return result === '2-0' || result === '2-1';
+}
+
+// Check if a result is a draw
+export function isDraw(result: string): boolean {
+  return result === 'draw';
 }
 
 // Local storage helpers

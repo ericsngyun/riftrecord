@@ -8,7 +8,7 @@ import { getLeaderById, getLeaderColors } from '@/data/leaders';
 import { RoundEntry } from './RoundEntry';
 import { RoundsList } from './RoundsList';
 import { formatDate } from '@/lib/utils';
-import { Settings, Share2 } from 'lucide-react';
+import { ArrowLeft, Share2 } from 'lucide-react';
 
 interface MatchTrackerProps {
   onViewResults: () => void;
@@ -80,14 +80,14 @@ export const MatchTracker = memo(function MatchTracker({ onViewResults, onReset 
             )}
           </div>
 
-          {/* Settings Button */}
+          {/* Back Button */}
           <button
             type="button"
             onClick={onReset}
             className="p-2 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-colors"
-            aria-label="Tournament settings"
+            aria-label="New tournament"
           >
-            <Settings className="w-4 h-4" />
+            <ArrowLeft className="w-4 h-4" />
           </button>
         </div>
       </div>

@@ -1,20 +1,42 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { useTournament } from '@/context/TournamentContext';
 import { TournamentSetup, MatchTracker, TournamentResults } from '@/components';
-import { LogOut, User } from 'lucide-react';
+import { LogOut, User, History, ChevronLeft } from 'lucide-react';
 import Image from 'next/image';
 
-type AppView = 'setup' | 'tracker' | 'results';
+type AppView = 'setup' | 'tracker' | 'results' | 'history';
+
+interface SavedTournament {
+  id: string;
+  title: string;
+  format: string;
+  leaderId: string;
+  date: string;
+  playerCount: number | null;
+  placing: number | null;
+  createdAt: string;
+  rounds: Array<{
+    id: string;
+    roundNumber: number;
+    type: string;
+    topcutLevel: string | null;
+    opponentLeader: string | null;
+    result: string | null;
+    diceWon: boolean | null;
+  }>;
+}
 
 export default function DashboardPage() {
   const { data: session } = useSession();
-  const { state, resetTournament } = useTournament();
+  const { state, resetTournament, updateTournament } = useTournament();
   const { tournament, isLoading } = state;
   const [manualView, setManualView] = useState<AppView | null>(null);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [savedTournaments, setSavedTournaments] = useState<SavedTournament[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
 
   const view = useMemo((): AppView => {
     if (manualView) return manualView;
@@ -35,6 +57,64 @@ export default function DashboardPage() {
       setShowResetConfirm(true);
       setTimeout(() => setShowResetConfirm(false), 3000);
     }
+  };
+
+  // Fetch saved tournaments
+  const fetchSavedTournaments = useCallback(async () => {
+    setLoadingHistory(true);
+    try {
+      const response = await fetch('/api/tournaments');
+      if (response.ok) {
+        const data = await response.json();
+        setSavedTournaments(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch tournaments:', error);
+    } finally {
+      setLoadingHistory(false);
+    }
+  }, []);
+
+  // Save current tournament
+  const handleSaveTournament = useCallback(async () => {
+    if (!tournament) return;
+
+    const response = await fetch('/api/tournaments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: tournament.title,
+        format: tournament.format,
+        leaderId: tournament.playerLeaderId,
+        date: tournament.date,
+        playerCount: tournament.playerCount,
+        placing: tournament.placing,
+        rounds: tournament.rounds,
+      }),
+    });
+
+    if (response.ok) {
+      updateTournament({ savedAt: new Date().toISOString() });
+      // Refresh the saved tournaments list
+      fetchSavedTournaments();
+    } else {
+      throw new Error('Failed to save tournament');
+    }
+  }, [tournament, updateTournament, fetchSavedTournaments]);
+
+  // Fetch saved tournaments on history view
+  useEffect(() => {
+    if (view === 'history') {
+      fetchSavedTournaments();
+    }
+  }, [view, fetchSavedTournaments]);
+
+  // Format placing with ordinal suffix
+  const formatPlacing = (placing: number): string => {
+    if (placing === 1) return '1st';
+    if (placing === 2) return '2nd';
+    if (placing === 3) return '3rd';
+    return `${placing}th`;
   };
 
   if (isLoading) {
@@ -63,6 +143,17 @@ export default function DashboardPage() {
 
             {/* User Menu */}
             <div className="flex items-center gap-2">
+              <button
+                onClick={() => setView(view === 'history' ? 'tracker' : 'history')}
+                className={`p-1.5 rounded-lg transition-colors ${
+                  view === 'history'
+                    ? 'text-rose-400 bg-rose-400/10'
+                    : 'text-foreground-muted hover:text-foreground hover:bg-background-tertiary'
+                }`}
+                title="Tournament History"
+              >
+                <History className="w-4 h-4" />
+              </button>
               {session?.user?.image ? (
                 <Image
                   src={session.user.image}
@@ -130,7 +221,74 @@ export default function DashboardPage() {
             )}
 
             {view === 'results' && tournament && (
-              <TournamentResults onBack={() => setView('tracker')} />
+              <TournamentResults
+                onBack={() => setView('tracker')}
+                onSave={handleSaveTournament}
+              />
+            )}
+
+            {view === 'history' && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setView(tournament ? 'tracker' : 'setup')}
+                    className="flex items-center gap-1.5 text-sm text-foreground-muted hover:text-foreground transition-colors"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    Back
+                  </button>
+                  <h2 className="text-lg font-semibold text-foreground">Saved Tournaments</h2>
+                </div>
+
+                {loadingHistory ? (
+                  <div className="text-center py-8 text-foreground-muted text-sm">
+                    Loading...
+                  </div>
+                ) : savedTournaments.length === 0 ? (
+                  <div className="bg-background-secondary rounded-xl border border-border p-8 text-center">
+                    <History className="w-8 h-8 text-foreground-muted mx-auto mb-3" />
+                    <p className="text-foreground-muted text-sm">No saved tournaments yet</p>
+                    <p className="text-foreground-muted/60 text-xs mt-1">
+                      Save your tournament results to see them here
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {savedTournaments.map((t) => {
+                      const wins = t.rounds.filter((r) => r.result === '2-0' || r.result === '2-1').length;
+                      const losses = t.rounds.filter((r) => r.result === '1-2' || r.result === '0-2').length;
+                      const draws = t.rounds.filter((r) => r.result === 'draw').length;
+                      const record = draws > 0 ? `${wins}-${losses}-${draws}` : `${wins}-${losses}`;
+                      return (
+                        <div
+                          key={t.id}
+                          className="bg-background-secondary rounded-xl border border-border p-4 hover:border-border-hover transition-colors"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h3 className="font-semibold text-foreground">{t.title}</h3>
+                              <p className="text-xs text-foreground-muted">
+                                {new Date(t.date).toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                })}
+                                {t.playerCount && ` · ${t.playerCount} players`}
+                                {t.placing && ` · ${formatPlacing(t.placing)}`}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-lg font-bold text-foreground">{record}</p>
+                              <p className="text-xs text-foreground-muted">{t.rounds.length} rounds</p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </main>

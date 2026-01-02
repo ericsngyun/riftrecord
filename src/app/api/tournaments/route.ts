@@ -26,7 +26,7 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const { title, format, leaderId, rounds } = body;
+  const { title, format, leaderId, date, playerCount, placing, rounds } = body;
 
   const tournament = await prisma.tournament.create({
     data: {
@@ -34,15 +34,19 @@ export async function POST(request: Request) {
       title,
       format,
       leaderId,
+      date: date ? new Date(date) : new Date(),
+      playerCount: playerCount || null,
+      placing: placing || null,
       rounds: {
         create: rounds?.map((r: any, index: number) => ({
-          roundNumber: index + 1,
-          type: r.type,
-          topcutLevel: r.topcutLevel,
-          opponentName: r.opponentName,
-          opponentLeader: r.opponentLeader,
+          roundNumber: r.roundNumber || index + 1,
+          type: r.roundType || r.type,
+          topcutLevel: r.topcutLevel || null,
+          opponentName: r.opponentName || null,
+          opponentLeader: r.opponentLeaderId || r.opponentLeader,
           result: r.result,
-          notes: r.notes,
+          diceWon: r.diceWon ?? null,
+          notes: r.notes || null,
         })) || [],
       },
     },

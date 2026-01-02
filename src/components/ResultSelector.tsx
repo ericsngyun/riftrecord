@@ -2,6 +2,7 @@
 
 import { MatchResult, MATCH_RESULTS } from '@/types';
 import { cn } from '@/lib/utils';
+import { Flag } from 'lucide-react';
 
 interface ResultSelectorProps {
   value: MatchResult | null;
@@ -10,6 +11,10 @@ interface ResultSelectorProps {
 }
 
 export function ResultSelector({ value, onChange, label }: ResultSelectorProps) {
+  // Separate win/loss results from draw
+  const winLossResults = MATCH_RESULTS.filter(r => !r.isDraw);
+  const drawResult = MATCH_RESULTS.find(r => r.isDraw);
+
   return (
     <div className="space-y-1.5">
       {label && (
@@ -18,7 +23,7 @@ export function ResultSelector({ value, onChange, label }: ResultSelectorProps) 
         </label>
       )}
       <div className="flex gap-1.5">
-        {MATCH_RESULTS.map((result) => (
+        {winLossResults.map((result) => (
           <button
             key={result.value}
             type="button"
@@ -36,6 +41,23 @@ export function ResultSelector({ value, onChange, label }: ResultSelectorProps) 
             {result.label}
           </button>
         ))}
+        {/* Draw Button */}
+        {drawResult && (
+          <button
+            type="button"
+            onClick={() => onChange(drawResult.value)}
+            className={cn(
+              'py-1.5 px-2.5 rounded-lg font-medium text-xs transition-all flex items-center gap-1',
+              value === drawResult.value
+                ? 'bg-white/20 text-white ring-1 ring-white/50'
+                : 'bg-background-tertiary text-foreground-muted hover:text-foreground'
+            )}
+            aria-pressed={value === drawResult.value}
+          >
+            <Flag className="w-3 h-3" />
+            {drawResult.label}
+          </button>
+        )}
       </div>
     </div>
   );

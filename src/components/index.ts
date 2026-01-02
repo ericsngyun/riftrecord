@@ -1,6 +1,7 @@
 export { LeaderCard } from './LeaderCard';
 export { LeaderSelector } from './LeaderSelector';
 export { FormatSelector } from './FormatSelector';
+export { DateSelector } from './DateSelector';
 export { TournamentSetup } from './TournamentSetup';
 export { ResultSelector } from './ResultSelector';
 export { RoundEntry } from './RoundEntry';
