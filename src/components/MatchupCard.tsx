@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import Image from 'next/image';
 import { TournamentRound, TOPCUT_LEVEL_OPTIONS } from '@/types';
 import { getLeaderById, getLeaderColors } from '@/data/leaders';
@@ -14,7 +15,7 @@ interface MatchupCardProps {
   showDeleteConfirm?: boolean;
 }
 
-export function MatchupCard({
+export const MatchupCard = memo(function MatchupCard({
   round,
   playerLeaderId,
   onDelete,
@@ -112,4 +113,4 @@ export function MatchupCard({
       )}
     </div>
   );
-}
+});

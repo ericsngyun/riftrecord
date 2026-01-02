@@ -1,5 +1,6 @@
 'use client';
 
+import { memo, useMemo } from 'react';
 import Image from 'next/image';
 import { useTournament } from '@/context/TournamentContext';
 import { TOURNAMENT_FORMATS } from '@/types';
@@ -14,7 +15,7 @@ interface MatchTrackerProps {
   onReset: () => void;
 }
 
-export function MatchTracker({ onViewResults, onReset }: MatchTrackerProps) {
+export const MatchTracker = memo(function MatchTracker({ onViewResults, onReset }: MatchTrackerProps) {
   const { state } = useTournament();
   const { tournament } = state;
 
@@ -24,10 +25,14 @@ export function MatchTracker({ onViewResults, onReset }: MatchTrackerProps) {
   const formatLabel = TOURNAMENT_FORMATS[tournament.format];
 
   // Calculate next round numbers
-  const swissRounds = tournament.rounds.filter((r) => r.roundType === 'swiss');
-  const topcutRounds = tournament.rounds.filter((r) => r.roundType === 'topcut');
-  const nextSwissRound = swissRounds.length + 1;
-  const nextTopcutRound = topcutRounds.length + 1;
+  const { nextSwissRound, nextTopcutRound } = useMemo(() => {
+    const swissRounds = tournament.rounds.filter((r) => r.roundType === 'swiss');
+    const topcutRounds = tournament.rounds.filter((r) => r.roundType === 'topcut');
+    return {
+      nextSwissRound: swissRounds.length + 1,
+      nextTopcutRound: topcutRounds.length + 1,
+    };
+  }, [tournament.rounds]);
 
   // Get leader colors for gradient
   const [color1, color2] = playerLeader
@@ -114,4 +119,4 @@ export function MatchTracker({ onViewResults, onReset }: MatchTrackerProps) {
       )}
     </div>
   );
-}
+});

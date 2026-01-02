@@ -1,5 +1,6 @@
 'use client';
 
+import { memo, useMemo } from 'react';
 import Image from 'next/image';
 import { useTournament } from '@/context/TournamentContext';
 import { TOURNAMENT_FORMATS, TOPCUT_LEVEL_OPTIONS } from '@/types';
@@ -12,7 +13,7 @@ interface TournamentResultsProps {
   onBack: () => void;
 }
 
-export function TournamentResults({ onBack }: TournamentResultsProps) {
+export const TournamentResults = memo(function TournamentResults({ onBack }: TournamentResultsProps) {
   const { state } = useTournament();
   const { tournament } = state;
 
@@ -20,9 +21,9 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
 
   const playerLeader = getLeaderById(tournament.playerLeaderId);
   const formatLabel = TOURNAMENT_FORMATS[tournament.format];
-  const stats = calculateFullTournamentStats(tournament.rounds);
-  const swissRounds = tournament.rounds.filter((r) => r.roundType === 'swiss');
-  const topcutRounds = tournament.rounds.filter((r) => r.roundType === 'topcut');
+  const stats = useMemo(() => calculateFullTournamentStats(tournament.rounds), [tournament.rounds]);
+  const swissRounds = useMemo(() => tournament.rounds.filter((r) => r.roundType === 'swiss'), [tournament.rounds]);
+  const topcutRounds = useMemo(() => tournament.rounds.filter((r) => r.roundType === 'topcut'), [tournament.rounds]);
 
   const [color1, color2] = playerLeader ? getLeaderColors(playerLeader) : ['#6b7280', '#9ca3af'];
 
@@ -47,33 +48,48 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
           }}
         >
           {/* Header */}
-          <div className="flex items-center gap-3 mb-5 pb-4 border-b border-white/10">
-            {playerLeader && (
-              <div
-                className="w-14 h-[70px] rounded-lg p-[2px] flex-shrink-0"
-                style={{ background: `linear-gradient(135deg, ${color1}, ${color2})` }}
-              >
-                <div className="w-full h-full rounded-[6px] overflow-hidden bg-black">
-                  <Image
-                    src={playerLeader.imageUrl}
-                    alt={playerLeader.displayName}
-                    width={56}
-                    height={70}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </div>
-            )}
-            <div className="flex-1 min-w-0">
-              <h2 className="text-base font-bold text-white truncate mb-0.5">{tournament.title}</h2>
-              <p className="text-[11px] text-white/60 mb-0.5">{formatLabel}</p>
-              {playerLeader && (
-                <p className="text-sm text-white/80 font-medium">{playerLeader.displayName}</p>
-              )}
+          <div className="mb-5 pb-4 border-b border-white/10">
+            {/* Summary Info */}
+            <div className="mb-3 space-y-1">
+              <h2 className="text-lg font-bold text-white">{tournament.title}</h2>
+              <p className="text-xs text-white/70">{formatLabel}</p>
+              <p className="text-[10px] text-white/50">
+                {new Date(tournament.createdAt).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric'
+                })}
+              </p>
             </div>
-            <div className="text-right">
-              <p className="text-3xl font-bold text-white leading-none mb-1">{stats.overall.record}</p>
-              <p className="text-[11px] text-white/60">{stats.overall.winRate}% WR</p>
+
+            {/* Leader and Score */}
+            <div className="flex items-center gap-3">
+              {playerLeader && (
+                <div
+                  className="w-14 h-[70px] rounded-lg p-[2px] flex-shrink-0"
+                  style={{ background: `linear-gradient(135deg, ${color1}, ${color2})` }}
+                >
+                  <div className="w-full h-full rounded-[6px] overflow-hidden bg-black">
+                    <Image
+                      src={playerLeader.imageUrl}
+                      alt={playerLeader.displayName}
+                      width={56}
+                      height={70}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                {playerLeader && (
+                  <p className="text-base font-bold text-white">{playerLeader.displayName}</p>
+                )}
+                <p className="text-[11px] text-white/60">{playerLeader?.title}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-3xl font-bold text-white leading-none mb-1">{stats.overall.record}</p>
+                <p className="text-[11px] text-white/60">{stats.overall.winRate}% WR</p>
+              </div>
             </div>
           </div>
 
@@ -350,4 +366,4 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
       </div>
     </div>
   );
-}
+});

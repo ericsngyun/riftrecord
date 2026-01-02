@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, memo, useMemo, useCallback } from 'react';
 import { TournamentRound } from '@/types';
 import { MatchupCard } from './MatchupCard';
 import { useTournament } from '@/context/TournamentContext';
@@ -12,15 +12,15 @@ interface RoundsListProps {
   playerLeaderId: string;
 }
 
-export function RoundsList({ rounds, playerLeaderId }: RoundsListProps) {
+export const RoundsList = memo(function RoundsList({ rounds, playerLeaderId }: RoundsListProps) {
   const { deleteRound } = useTournament();
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
-  const stats = calculateFullTournamentStats(rounds);
-  const swissRounds = rounds.filter((r) => r.roundType === 'swiss');
-  const topcutRounds = rounds.filter((r) => r.roundType === 'topcut');
+  const stats = useMemo(() => calculateFullTournamentStats(rounds), [rounds]);
+  const swissRounds = useMemo(() => rounds.filter((r) => r.roundType === 'swiss'), [rounds]);
+  const topcutRounds = useMemo(() => rounds.filter((r) => r.roundType === 'topcut'), [rounds]);
 
-  const handleDeleteClick = (roundId: string) => {
+  const handleDeleteClick = useCallback((roundId: string) => {
     if (deleteConfirmId === roundId) {
       deleteRound(roundId);
       setDeleteConfirmId(null);
@@ -28,7 +28,7 @@ export function RoundsList({ rounds, playerLeaderId }: RoundsListProps) {
       setDeleteConfirmId(roundId);
       setTimeout(() => setDeleteConfirmId(null), 3000);
     }
-  };
+  }, [deleteConfirmId, deleteRound]);
 
   if (rounds.length === 0) {
     return (
@@ -100,4 +100,4 @@ export function RoundsList({ rounds, playerLeaderId }: RoundsListProps) {
       )}
     </div>
   );
-}
+});

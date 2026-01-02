@@ -62,7 +62,7 @@ body {
 
 /* Background image utility */
 .bg-app {
-  background-image: url('/background.jpg');
+  background-image: url('/background.avif');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;

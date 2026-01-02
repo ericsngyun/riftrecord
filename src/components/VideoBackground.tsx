@@ -20,12 +20,12 @@ export function VideoBackground({ className = '' }: VideoBackgroundProps) {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Use mobile-bg.jpg for mobile, background.jpg for desktop
+  // Use mobile-bg.avif for mobile, background.avif for desktop
   const backgroundImage = isMobile === null
-    ? '/background.jpg'
+    ? '/background.avif'
     : isMobile
-      ? '/mobile-bg.jpg'
-      : '/background.jpg';
+      ? '/mobile-bg.avif'
+      : '/background.avif';
 
   return (
     <div

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useMemo, useCallback, ReactNode } from 'react';
 import {
   Tournament,
   TournamentRound,
@@ -219,15 +219,15 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
     }
   }, [state.tournament, state.isLoading]);
 
-  const createTournament = (title: string, format: TournamentFormat, playerLeaderId: string) => {
+  const createTournament = useCallback((title: string, format: TournamentFormat, playerLeaderId: string) => {
     dispatch({ type: 'CREATE_TOURNAMENT', payload: { title, format, playerLeaderId } });
-  };
+  }, []);
 
-  const updateTournament = (updates: Partial<Tournament>) => {
+  const updateTournament = useCallback((updates: Partial<Tournament>) => {
     dispatch({ type: 'UPDATE_TOURNAMENT', payload: updates });
-  };
+  }, []);
 
-  const addRound = (
+  const addRound = useCallback((
     opponentLeaderId: string,
     result: MatchResult,
     roundType: RoundType,
@@ -239,35 +239,38 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
       type: 'ADD_ROUND',
       payload: { opponentLeaderId, result, roundType, topcutLevel, diceWon, notes },
     });
-  };
+  }, []);
 
-  const updateRound = (roundId: string, updates: Partial<TournamentRound>) => {
+  const updateRound = useCallback((roundId: string, updates: Partial<TournamentRound>) => {
     dispatch({ type: 'UPDATE_ROUND', payload: { roundId, updates } });
-  };
+  }, []);
 
-  const deleteRound = (roundId: string) => {
+  const deleteRound = useCallback((roundId: string) => {
     dispatch({ type: 'DELETE_ROUND', payload: { roundId } });
-  };
+  }, []);
 
-  const resetTournament = () => {
+  const resetTournament = useCallback(() => {
     dispatch({ type: 'RESET_TOURNAMENT' });
     if (typeof window !== 'undefined') {
       localStorage.removeItem('riftrecord_tournament');
     }
-  };
+  }, []);
+
+  const value = useMemo(
+    () => ({
+      state,
+      createTournament,
+      updateTournament,
+      addRound,
+      updateRound,
+      deleteRound,
+      resetTournament,
+    }),
+    [state, createTournament, updateTournament, addRound, updateRound, deleteRound, resetTournament]
+  );
 
   return (
-    <TournamentContext.Provider
-      value={{
-        state,
-        createTournament,
-        updateTournament,
-        addRound,
-        updateRound,
-        deleteRound,
-        resetTournament,
-      }}
-    >
+    <TournamentContext.Provider value={value}>
       {children}
     </TournamentContext.Provider>
   );
