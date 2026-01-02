@@ -5,7 +5,7 @@ import { useTournament } from '@/context/TournamentContext';
 import { TOURNAMENT_FORMATS, TOPCUT_LEVEL_OPTIONS } from '@/types';
 import { getLeaderById, getLeaderColors } from '@/data/leaders';
 import { calculateFullTournamentStats, isWin } from '@/lib/utils';
-import { ArrowLeft, Swords, Dices } from 'lucide-react';
+import { ArrowLeft, Swords, Dices, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface TournamentResultsProps {
