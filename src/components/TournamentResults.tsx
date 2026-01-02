@@ -1,12 +1,11 @@
 'use client';
 
-import { useRef, useState } from 'react';
 import Image from 'next/image';
 import { useTournament } from '@/context/TournamentContext';
 import { TOURNAMENT_FORMATS, TOPCUT_LEVEL_OPTIONS } from '@/types';
 import { getLeaderById, getLeaderColors } from '@/data/leaders';
 import { calculateFullTournamentStats, isWin } from '@/lib/utils';
-import { ArrowLeft, Download, Copy, Check, Twitter, Trophy, Swords, Dices } from 'lucide-react';
+import { ArrowLeft, Swords, Dices } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface TournamentResultsProps {
@@ -16,9 +15,6 @@ interface TournamentResultsProps {
 export function TournamentResults({ onBack }: TournamentResultsProps) {
   const { state } = useTournament();
   const { tournament } = state;
-  const exportRef = useRef<HTMLDivElement>(null);
-  const [isExporting, setIsExporting] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   if (!tournament) return null;
 
@@ -29,86 +25,6 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
   const topcutRounds = tournament.rounds.filter((r) => r.roundType === 'topcut');
 
   const [color1, color2] = playerLeader ? getLeaderColors(playerLeader) : ['#6b7280', '#9ca3af'];
-
-  const handleExport = async () => {
-    if (!exportRef.current) return;
-    setIsExporting(true);
-
-    try {
-      const html2canvas = (await import('html2canvas')).default;
-      const canvas = await html2canvas(exportRef.current, {
-        backgroundColor: '#0a0a0f',
-        scale: 3,
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        imageTimeout: 0,
-        onclone: (clonedDoc) => {
-          const clonedEl = clonedDoc.querySelector('[data-export]');
-          if (clonedEl) {
-            (clonedEl as HTMLElement).style.borderRadius = '0';
-          }
-        },
-      });
-
-      const dataUrl = canvas.toDataURL('image/png', 1.0);
-      const link = document.createElement('a');
-      link.download = `riftrecord-${tournament.title.replace(/\s+/g, '-').toLowerCase()}.png`;
-      link.href = dataUrl;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (error) {
-      console.error('Export failed:', error);
-      alert('Failed to export image. Please try again.');
-    } finally {
-      setIsExporting(false);
-    }
-  };
-
-  const handleCopyToClipboard = async () => {
-    if (!exportRef.current) return;
-    setIsExporting(true);
-
-    try {
-      const html2canvas = (await import('html2canvas')).default;
-      const canvas = await html2canvas(exportRef.current, {
-        backgroundColor: '#0a0a0f',
-        scale: 3,
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        imageTimeout: 0,
-      });
-
-      canvas.toBlob(async (blob) => {
-        if (blob) {
-          try {
-            await navigator.clipboard.write([
-              new ClipboardItem({ 'image/png': blob }),
-            ]);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-          } catch (clipboardError) {
-            console.error('Clipboard write failed:', clipboardError);
-            // Fallback to download
-            handleExport();
-          }
-        } else {
-          console.error('Failed to create blob');
-          setIsExporting(false);
-        }
-      }, 'image/png', 1.0);
-    } catch (error) {
-      console.error('Copy failed:', error);
-      alert('Failed to copy image. Downloading instead...');
-      handleExport();
-    }
-  };
-
-  const tweetText = encodeURIComponent(
-    `${tournament.title}\n\nPlaying ${playerLeader?.displayName}: ${stats.overall.record} (${stats.overall.winRate}% WR)${topcutRounds.length > 0 ? `\nTop Cut: ${stats.topcut.record}` : ''}\n\n#Riftbound #RiftRecord`
-  );
 
   return (
     <div className="space-y-4">
@@ -122,12 +38,8 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
         Back
       </button>
 
-      {/* Export Card */}
-      <div
-        ref={exportRef}
-        data-export
-        className="rounded-xl overflow-hidden mx-auto max-w-sm md:max-w-md lg:max-w-lg"
-      >
+      {/* Results Card - Optimized for Screenshots */}
+      <div className="rounded-xl overflow-hidden mx-auto max-w-sm md:max-w-md lg:max-w-lg border border-border shadow-xl">
         <div
           className="p-4"
           style={{
@@ -307,44 +219,6 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
             </p>
           </div>
         </div>
-      </div>
-
-      {/* Actions */}
-      <div className="flex gap-2 max-w-sm md:max-w-md lg:max-w-lg mx-auto">
-        <button
-          type="button"
-          onClick={handleCopyToClipboard}
-          disabled={isExporting}
-          className={cn(
-            'flex-1 py-2.5 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-all',
-            copied
-              ? 'bg-emerald-500/20 text-emerald-400'
-              : 'bg-rose-500/20 text-rose-400 hover:bg-rose-500/30'
-          )}
-        >
-          {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-          {copied ? 'Copied!' : 'Copy Image'}
-        </button>
-
-        <button
-          type="button"
-          onClick={handleExport}
-          disabled={isExporting}
-          className="flex-1 py-2.5 bg-background-tertiary hover:bg-background-secondary text-foreground rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
-        >
-          <Download className="w-4 h-4" />
-          Download
-        </button>
-
-        <a
-          href={`https://twitter.com/intent/tweet?text=${tweetText}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex-1 py-2.5 bg-background-tertiary hover:bg-background-secondary text-foreground rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
-        >
-          <Twitter className="w-4 h-4" />
-          Share
-        </a>
       </div>
 
       {/* Detailed Results */}
