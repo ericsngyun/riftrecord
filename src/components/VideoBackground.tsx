@@ -46,11 +46,12 @@ export function VideoBackground({ className = '' }: VideoBackgroundProps) {
   return (
     <div className={`absolute inset-0 overflow-hidden ${className}`}>
       <video
-        key={isMobile ? 'mobile' : 'desktop'}
+        key={videoSrc}
         autoPlay
         muted
         loop
         playsInline
+        preload="auto"
         poster={posterSrc}
         onError={() => setVideoError(true)}
         className="absolute min-w-full min-h-full object-cover"
