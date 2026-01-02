@@ -179,23 +179,7 @@ export function LeaderSelector({
 
               {/* Content */}
               <div className="relative h-full flex items-center px-4 gap-3">
-                {/* Leader info */}
-                <div className="flex-1 text-left min-w-0 py-3 pr-4">
-                  <h3 className={cn(
-                    'font-bold truncate transition-all duration-300 mb-1 drop-shadow-lg',
-                    isSelected ? 'text-rose-400 text-2xl' : 'text-foreground text-xl group-hover:text-rose-300'
-                  )}>
-                    {leader.displayName}
-                  </h3>
-                  <p className={cn(
-                    'text-base truncate transition-colors drop-shadow-md',
-                    isSelected ? 'text-foreground-secondary' : 'text-foreground-muted group-hover:text-foreground-secondary'
-                  )}>
-                    {leader.title}
-                  </p>
-                </div>
-
-                {/* Accent gradient bar */}
+                {/* Accent gradient bar - left side */}
                 <div
                   className={cn(
                     "w-1 h-16 rounded-full transition-all duration-300 flex-shrink-0",
@@ -205,6 +189,22 @@ export function LeaderSelector({
                     background: `linear-gradient(180deg, ${color1}, ${color2})`
                   }}
                 />
+
+                {/* Leader info */}
+                <div className="flex-1 text-left min-w-0 py-3">
+                  <h3 className={cn(
+                    'font-bold truncate transition-all duration-300 leading-tight drop-shadow-lg',
+                    isSelected ? 'text-rose-400 text-xl' : 'text-foreground text-lg group-hover:text-rose-300'
+                  )}>
+                    {leader.displayName}
+                  </h3>
+                  <p className={cn(
+                    'text-sm truncate transition-colors drop-shadow-md mt-0.5 tracking-wide',
+                    isSelected ? 'text-foreground-secondary' : 'text-foreground-muted group-hover:text-foreground-secondary'
+                  )}>
+                    {leader.title}
+                  </p>
+                </div>
               </div>
 
               {/* Hover glow effect */}
