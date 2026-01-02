@@ -39,41 +39,41 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
       </button>
 
       {/* Results Card - Optimized for Screenshots */}
-      <div className="rounded-xl overflow-hidden mx-auto max-w-sm md:max-w-md lg:max-w-lg border border-border shadow-xl">
+      <div className="rounded-xl overflow-hidden mx-auto w-full max-w-[400px] border-2 border-border shadow-2xl">
         <div
-          className="p-4"
+          className="p-5"
           style={{
             background: `linear-gradient(135deg, ${color1}15 0%, #0a0a0f 50%, ${color2}15 100%)`,
           }}
         >
           {/* Header */}
-          <div className="flex items-center gap-3 mb-4 pb-3 border-b border-white/10">
+          <div className="flex items-center gap-3 mb-5 pb-4 border-b border-white/10">
             {playerLeader && (
               <div
-                className="w-12 h-[60px] rounded-lg p-[2px] flex-shrink-0"
+                className="w-14 h-[70px] rounded-lg p-[2px] flex-shrink-0"
                 style={{ background: `linear-gradient(135deg, ${color1}, ${color2})` }}
               >
                 <div className="w-full h-full rounded-[6px] overflow-hidden bg-black">
                   <Image
                     src={playerLeader.imageUrl}
                     alt={playerLeader.displayName}
-                    width={48}
-                    height={60}
+                    width={56}
+                    height={70}
                     className="w-full h-full object-cover"
                   />
                 </div>
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <h2 className="text-sm font-bold text-white truncate">{tournament.title}</h2>
-              <p className="text-[10px] text-white/50">{formatLabel}</p>
+              <h2 className="text-base font-bold text-white truncate mb-0.5">{tournament.title}</h2>
+              <p className="text-[11px] text-white/60 mb-0.5">{formatLabel}</p>
               {playerLeader && (
-                <p className="text-xs text-white/70">{playerLeader.displayName}</p>
+                <p className="text-sm text-white/80 font-medium">{playerLeader.displayName}</p>
               )}
             </div>
             <div className="text-right">
-              <p className="text-2xl font-bold text-white">{stats.overall.record}</p>
-              <p className="text-[10px] text-white/50">{stats.overall.winRate}% WR</p>
+              <p className="text-3xl font-bold text-white leading-none mb-1">{stats.overall.record}</p>
+              <p className="text-[11px] text-white/60">{stats.overall.winRate}% WR</p>
             </div>
           </div>
 
@@ -213,8 +213,8 @@ export function TournamentResults({ onBack }: TournamentResultsProps) {
           </div>
 
           {/* Footer */}
-          <div className="mt-4 pt-2 border-t border-white/10">
-            <p className="text-[8px] text-white/30 text-center uppercase tracking-widest">
+          <div className="mt-5 pt-3 border-t border-white/10">
+            <p className="text-[9px] text-white/40 text-center uppercase tracking-widest font-medium">
               RiftRecord
             </p>
           </div>
