@@ -4,7 +4,7 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { useTournament } from '@/context/TournamentContext';
 import { TournamentSetup, MatchTracker, TournamentResults } from '@/components';
-import { LogOut, User, History, ChevronLeft } from 'lucide-react';
+import { LogOut, User, History, ChevronLeft, X } from 'lucide-react';
 import Image from 'next/image';
 import { clearTournamentStorage } from '@/lib/utils';
 
@@ -32,12 +32,14 @@ interface SavedTournament {
 
 export default function DashboardPage() {
   const { data: session } = useSession();
-  const { state, resetTournament, updateTournament } = useTournament();
+  const { state, resetTournament, updateTournament, createTournament } = useTournament();
   const { tournament, isLoading } = state;
   const [manualView, setManualView] = useState<AppView | null>(null);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [savedTournaments, setSavedTournaments] = useState<SavedTournament[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const view = useMemo((): AppView => {
     if (manualView) return manualView;
@@ -82,32 +84,112 @@ export default function DashboardPage() {
     }
   }, []);
 
-  // Save current tournament
+  // Save current tournament (create new or update existing)
   const handleSaveTournament = useCallback(async () => {
     if (!tournament) return;
 
-    const response = await fetch('/api/tournaments', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title: tournament.title,
-        format: tournament.format,
-        leaderId: tournament.playerLeaderId,
-        date: tournament.date,
-        playerCount: tournament.playerCount,
-        placing: tournament.placing,
-        rounds: tournament.rounds,
-      }),
-    });
+    setSaveError(null);
 
-    if (response.ok) {
-      updateTournament({ savedAt: new Date().toISOString() });
-      // Refresh the saved tournaments list
-      fetchSavedTournaments();
-    } else {
-      throw new Error('Failed to save tournament');
+    try {
+      // Check if tournament is already saved (has database ID from savedAt)
+      const isUpdate = !!tournament.savedAt;
+
+      const response = await fetch(
+        isUpdate ? `/api/tournaments/${tournament.id}` : '/api/tournaments',
+        {
+          method: isUpdate ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: tournament.title,
+            format: tournament.format,
+            leaderId: tournament.playerLeaderId,
+            date: tournament.date,
+            playerCount: tournament.playerCount,
+            placing: tournament.placing,
+            rounds: tournament.rounds,
+          }),
+        }
+      );
+
+      if (response.ok) {
+        const savedTournament = await response.json();
+        // Update tournament with database ID if it's a new save
+        if (!isUpdate) {
+          updateTournament({
+            id: savedTournament.id,
+            savedAt: new Date().toISOString()
+          });
+        }
+        // Refresh the saved tournaments list
+        fetchSavedTournaments();
+      } else {
+        const error = await response.json();
+        setSaveError(error.error || 'Failed to save tournament');
+        throw new Error('Failed to save tournament');
+      }
+    } catch (error) {
+      console.error('Save error:', error);
+      setSaveError('Network error - please try again');
     }
   }, [tournament, updateTournament, fetchSavedTournaments]);
+
+  // Load tournament from history
+  const handleLoadTournament = useCallback(async (tournamentId: string) => {
+    try {
+      const response = await fetch(`/api/tournaments/${tournamentId}`);
+      if (response.ok) {
+        const data = await response.json();
+        // Convert database format to app format
+        createTournament(
+          data.title,
+          data.format,
+          data.leaderId,
+          data.date,
+          data.playerCount
+        );
+        // Update with rounds and other data
+        updateTournament({
+          id: data.id,
+          placing: data.placing,
+          rounds: data.rounds.map((r: any) => ({
+            id: r.id,
+            roundNumber: r.roundNumber,
+            roundType: r.type,
+            opponentLeaderId: r.opponentLeader,
+            opponentName: r.opponentName,
+            result: r.result,
+            diceWon: r.diceWon,
+            topcutLevel: r.topcutLevel,
+            notes: r.notes,
+          })),
+          savedAt: data.createdAt,
+        });
+        setView('tracker');
+      }
+    } catch (error) {
+      console.error('Failed to load tournament:', error);
+    }
+  }, [createTournament, updateTournament, setView]);
+
+  // Delete tournament
+  const handleDeleteTournament = useCallback(async (tournamentId: string) => {
+    if (deletingId === tournamentId) {
+      try {
+        const response = await fetch(`/api/tournaments/${tournamentId}`, {
+          method: 'DELETE',
+        });
+        if (response.ok) {
+          fetchSavedTournaments();
+          setDeletingId(null);
+        }
+      } catch (error) {
+        console.error('Failed to delete tournament:', error);
+      }
+    } else {
+      setDeletingId(tournamentId);
+      setTimeout(() => setDeletingId(null), 3000);
+    }
+  }, [deletingId, fetchSavedTournaments]);
 
   // Fetch saved tournaments on history view
   useEffect(() => {
@@ -228,10 +310,27 @@ export default function DashboardPage() {
             )}
 
             {view === 'results' && tournament && (
-              <TournamentResults
-                onBack={() => setView('tracker')}
-                onSave={handleSaveTournament}
-              />
+              <>
+                {saveError && (
+                  <div className="mb-3 p-3 bg-accent-danger/10 border border-accent-danger/30 rounded-lg flex items-center justify-between">
+                    <span className="text-sm text-accent-danger">{saveError}</span>
+                    <button
+                      type="button"
+                      onClick={() => setSaveError(null)}
+                      className="text-accent-danger hover:text-red-400"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+                <TournamentResults
+                  onBack={() => {
+                    setView('tracker');
+                    setSaveError(null);
+                  }}
+                  onSave={handleSaveTournament}
+                />
+              </>
             )}
 
             {view === 'history' && (
@@ -267,28 +366,57 @@ export default function DashboardPage() {
                       const losses = t.rounds.filter((r) => r.result === '1-2' || r.result === '0-2').length;
                       const draws = t.rounds.filter((r) => r.result === 'draw').length;
                       const record = draws > 0 ? `${wins}-${losses}-${draws}` : `${wins}-${losses}`;
+                      const isDeleting = deletingId === t.id;
                       return (
                         <div
                           key={t.id}
-                          className="bg-background-secondary rounded-xl border border-border p-4 hover:border-border-hover transition-colors"
+                          className={`bg-background-secondary rounded-xl border ${
+                            isDeleting ? 'border-accent-danger' : 'border-border'
+                          } overflow-hidden transition-colors`}
                         >
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h3 className="font-semibold text-foreground">{t.title}</h3>
-                              <p className="text-xs text-foreground-muted">
-                                {new Date(t.date).toLocaleDateString('en-US', {
-                                  month: 'short',
-                                  day: 'numeric',
-                                  year: 'numeric',
-                                })}
-                                {t.playerCount && ` · ${t.playerCount} players`}
-                                {t.placing && ` · ${formatPlacing(t.placing)}`}
-                              </p>
+                          <button
+                            type="button"
+                            onClick={() => handleLoadTournament(t.id)}
+                            className="w-full p-4 text-left hover:bg-background-tertiary/30 transition-colors"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1 min-w-0">
+                                <h3 className="font-semibold text-foreground truncate">{t.title}</h3>
+                                <p className="text-xs text-foreground-muted">
+                                  {new Date(t.date).toLocaleDateString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric',
+                                  })}
+                                  {t.playerCount && ` · ${t.playerCount} players`}
+                                  {t.placing && ` · ${formatPlacing(t.placing)}`}
+                                </p>
+                              </div>
+                              <div className="text-right flex-shrink-0 ml-4">
+                                <p className="text-lg font-bold text-foreground">{record}</p>
+                                <p className="text-xs text-foreground-muted">{t.rounds.length} rounds</p>
+                              </div>
                             </div>
-                            <div className="text-right">
-                              <p className="text-lg font-bold text-foreground">{record}</p>
-                              <p className="text-xs text-foreground-muted">{t.rounds.length} rounds</p>
-                            </div>
+                          </button>
+                          <div className="border-t border-border px-4 py-2 flex items-center justify-between bg-background-tertiary/20">
+                            <button
+                              type="button"
+                              onClick={() => handleLoadTournament(t.id)}
+                              className="text-xs text-accent-primary hover:text-purple-400 transition-colors font-medium"
+                            >
+                              Load & Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteTournament(t.id)}
+                              className={`text-xs transition-colors font-medium ${
+                                isDeleting
+                                  ? 'text-accent-danger'
+                                  : 'text-foreground-muted hover:text-accent-danger'
+                              }`}
+                            >
+                              {isDeleting ? 'Click again to delete' : 'Delete'}
+                            </button>
                           </div>
                         </div>
                       );
