@@ -230,6 +230,39 @@ export const LEADERS: Leader[] = [
     domains: ['o', 'p'],
     imageUrl: '/leaders/sivir-op.png',
   },
+  // Proving Grounds Set
+  {
+    id: 'annie',
+    name: 'annie',
+    displayName: 'Annie',
+    title: 'Dark Child',
+    domains: ['r', 'p'],
+    imageUrl: '/leaders/annie-rp.png',
+  },
+  {
+    id: 'garen',
+    name: 'garen',
+    displayName: 'Garen',
+    title: 'Might of Demacia',
+    domains: ['o', 'y'],
+    imageUrl: '/leaders/garen-oy.avif',
+  },
+  {
+    id: 'lux',
+    name: 'lux',
+    displayName: 'Lux',
+    title: 'Lady of Luminosity',
+    domains: ['b', 'y'],
+    imageUrl: '/leaders/lux-by.avif',
+  },
+  {
+    id: 'masteryi',
+    name: 'masteryi',
+    displayName: 'Master Yi',
+    title: 'Wuju Bladesman',
+    domains: ['g', 'o'],
+    imageUrl: '/leaders/masteryi-go.avif',
+  },
 ];
 
 // Helper functions

@@ -32,6 +32,10 @@ const LEADER_IMAGE_POSITIONS: Record<string, string> = {
   'renata': 'center 15%',        // raised slightly
   'rumble': 'center 30%',        // lowered a bit
   'sivir': 'center 20%',         // default
+  'annie': 'center 20%',         // default
+  'garen': 'center 20%',         // default
+  'lux': 'center 20%',           // default
+  'masteryi': 'center 20%',      // default
 };
 
 interface LeaderSelectorProps {
