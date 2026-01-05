@@ -121,18 +121,22 @@ export function isDraw(result: string): boolean {
   return result === 'draw';
 }
 
-// Local storage helpers
-const STORAGE_KEY = 'riftrecord_tournament';
+// Local storage helpers - user-scoped
+const STORAGE_KEY_PREFIX = 'riftrecord_tournament';
 
-export function saveTournamentToStorage(tournament: unknown): void {
+function getStorageKey(userId?: string | null): string {
+  return userId ? `${STORAGE_KEY_PREFIX}_${userId}` : STORAGE_KEY_PREFIX;
+}
+
+export function saveTournamentToStorage(tournament: unknown, userId?: string | null): void {
   if (typeof window !== 'undefined') {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(tournament));
+    localStorage.setItem(getStorageKey(userId), JSON.stringify(tournament));
   }
 }
 
-export function loadTournamentFromStorage(): unknown | null {
+export function loadTournamentFromStorage(userId?: string | null): unknown | null {
   if (typeof window !== 'undefined') {
-    const data = localStorage.getItem(STORAGE_KEY);
+    const data = localStorage.getItem(getStorageKey(userId));
     if (data) {
       try {
         return JSON.parse(data);
@@ -144,8 +148,20 @@ export function loadTournamentFromStorage(): unknown | null {
   return null;
 }
 
-export function clearTournamentStorage(): void {
+export function clearTournamentStorage(userId?: string | null): void {
   if (typeof window !== 'undefined') {
-    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(getStorageKey(userId));
+  }
+}
+
+// Clear all user tournament data (for cleanup on logout)
+export function clearAllTournamentStorage(): void {
+  if (typeof window !== 'undefined') {
+    const keys = Object.keys(localStorage);
+    keys.forEach(key => {
+      if (key.startsWith(STORAGE_KEY_PREFIX)) {
+        localStorage.removeItem(key);
+      }
+    });
   }
 }

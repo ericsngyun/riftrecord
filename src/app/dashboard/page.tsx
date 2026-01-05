@@ -6,6 +6,7 @@ import { useTournament } from '@/context/TournamentContext';
 import { TournamentSetup, MatchTracker, TournamentResults } from '@/components';
 import { LogOut, User, History, ChevronLeft } from 'lucide-react';
 import Image from 'next/image';
+import { clearTournamentStorage } from '@/lib/utils';
 
 type AppView = 'setup' | 'tracker' | 'results' | 'history';
 
@@ -58,6 +59,12 @@ export default function DashboardPage() {
       setTimeout(() => setShowResetConfirm(false), 3000);
     }
   };
+
+  const handleSignOut = useCallback(() => {
+    // Clear user's localStorage before signing out
+    clearTournamentStorage(session?.user?.id);
+    signOut({ callbackUrl: '/' });
+  }, [session?.user?.id]);
 
   // Fetch saved tournaments
   const fetchSavedTournaments = useCallback(async () => {
@@ -174,7 +181,7 @@ export default function DashboardPage() {
                 </span>
               )}
               <button
-                onClick={() => signOut({ callbackUrl: '/' })}
+                onClick={handleSignOut}
                 className="p-1.5 rounded-lg text-foreground-muted hover:text-foreground hover:bg-background-tertiary transition-colors"
                 title="Sign out"
               >

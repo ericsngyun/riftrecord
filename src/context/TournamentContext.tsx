@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useReducer, useEffect, useMemo, useCallback, ReactNode } from 'react';
+import { useSession } from 'next-auth/react';
 import {
   Tournament,
   TournamentRound,
@@ -13,6 +14,7 @@ import {
   generateId,
   saveTournamentToStorage,
   loadTournamentFromStorage,
+  clearTournamentStorage,
 } from '@/lib/utils';
 
 // State shape
@@ -207,19 +209,23 @@ const TournamentContext = createContext<TournamentContextValue | undefined>(unde
 // Provider component
 export function TournamentProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(tournamentReducer, initialState);
+  const { data: session } = useSession();
+  const userId = session?.user?.id;
 
-  // Load from localStorage on mount
+  // Load from localStorage when user session is ready
   useEffect(() => {
-    const saved = loadTournamentFromStorage();
-    dispatch({ type: 'LOAD_TOURNAMENT', payload: saved as Tournament | null });
-  }, []);
-
-  // Save to localStorage on changes
-  useEffect(() => {
-    if (!state.isLoading && state.tournament) {
-      saveTournamentToStorage(state.tournament);
+    if (userId !== undefined) {
+      const saved = loadTournamentFromStorage(userId);
+      dispatch({ type: 'LOAD_TOURNAMENT', payload: saved as Tournament | null });
     }
-  }, [state.tournament, state.isLoading]);
+  }, [userId]);
+
+  // Save to localStorage on changes (user-scoped)
+  useEffect(() => {
+    if (!state.isLoading && state.tournament && userId) {
+      saveTournamentToStorage(state.tournament, userId);
+    }
+  }, [state.tournament, state.isLoading, userId]);
 
   const createTournament = useCallback((title: string, format: TournamentFormat, playerLeaderId: string, date?: string, playerCount?: number) => {
     dispatch({ type: 'CREATE_TOURNAMENT', payload: { title, format, playerLeaderId, date, playerCount } });
@@ -253,10 +259,8 @@ export function TournamentProvider({ children }: { children: ReactNode }) {
 
   const resetTournament = useCallback(() => {
     dispatch({ type: 'RESET_TOURNAMENT' });
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('riftrecord_tournament');
-    }
-  }, []);
+    clearTournamentStorage(userId);
+  }, [userId]);
 
   const value = useMemo(
     () => ({
