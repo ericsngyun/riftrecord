@@ -43,7 +43,7 @@ export const LEADERS: Leader[] = [
     displayName: 'Ahri',
     title: 'Nine-Tailed Fox',
     domains: ['g', 'b'],
-    imageUrl: '/leaders/ahri-gb.png',
+    imageUrl: '/leaders/ahri-gb.jpg',
   },
   {
     id: 'darius',
@@ -51,7 +51,7 @@ export const LEADERS: Leader[] = [
     displayName: 'Darius',
     title: 'Hand of Noxus',
     domains: ['r', 'y'],
-    imageUrl: '/leaders/darius-ry.png',
+    imageUrl: '/leaders/darius-ry.jpg',
   },
   {
     id: 'jinx',
@@ -140,7 +140,7 @@ export const LEADERS: Leader[] = [
     displayName: 'Azir',
     title: 'Emperor of the Sands',
     domains: ['g', 'y'],
-    imageUrl: '/leaders/azir-gy.png',
+    imageUrl: '/leaders/azir-gy.jpg',
   },
   {
     id: 'draven',
